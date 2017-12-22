@@ -26,6 +26,15 @@ class DevTools extends Component {
     });
   }
 
+  handlelargeDataClick = () => {
+    Meteor.call("devtools/loaddata/large", (error) => {
+      if (error) {
+        Alerts.toast(`Error loading large sample data ${error.reason}`, "error");
+      } else {
+        Alerts.toast("Load large dataset successful", "success");
+      }
+    });
+  }
 
   render() {
     return (
@@ -41,6 +50,7 @@ class DevTools extends Component {
             label={"Reset Products and Tags"}
             onClick={this.handleResetDataClick}
           />
+          <br />
           <Button
             bezelStyle={"solid"}
             primary={true}
@@ -57,7 +67,7 @@ class DevTools extends Component {
             bezelStyle={"solid"}
             primary={true}
             label={"Load sample Produts and Tags"}
-            onClick={this.handleSeedDataClick}
+            onClick={this.handlelargeDataClick}
           />
         </SettingsCard>
       </div>

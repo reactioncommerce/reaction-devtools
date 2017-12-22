@@ -1,6 +1,10 @@
+import faker from "faker";
+import { slugify } from "transliteration";
 import { Meteor } from "meteor/meteor";
-import { Shops, Products, ProductSearch, Tags, Shipping, Media, Jobs } from "/lib/collections";
+import { Random } from "meteor/random";
+import { Shops, Products, ProductSearch, Tags, Media, Jobs } from "/lib/collections";
 import { Reaction, Logger } from "/server/api";
+import { productTemplate, variantTemplate, optionTemplate } from "./dataset";
 import core from "/server/api/core";
 
 
@@ -103,6 +107,40 @@ methods.importProductImages = function () {
   Logger.info("loaded product images");
 };
 
+methods.addProduct = function (bulk) {
+  const product = productTemplate;
+  const productId = Random.secret();
+  console.log("productId", typeof productId);
+  const variant = variantTemplate;
+  const variantId = Random.secret();
+  product._id = productId;
+  product.description = faker.lorem.paragraph();
+  product.title = faker.commerce.productName();
+  product.vendor = faker.company.companyName();
+  product.handle = slugify(product.title);
+  product.createdAt = new Date();
+  product.updatedAt = new Date();
+  bulk.insert(product);
+  delete product._id;
+  variant._id = variantId;
+  variant.ancestors = [productId];
+  variant.title = faker.commerce.productName();
+  variant.createdAt = new Date();
+  variant.updatedAt = new Date();
+  bulk.insert(variant);
+  delete variant._id;
+  const numOptions = Random.choice([1, 2, 3, 4]);
+  for (let x = 0; x < numOptions; x++) {
+    const option = optionTemplate;
+    option.optionTitle = faker.commerce.productName();
+    option.price = faker.commerce.price();
+    option.ancestors = [productId, variantId];
+    bulk.insert(option);
+    delete option._id;
+  }
+  return { productId, variantId };
+};
+
 methods.resetData = function () {
   // delete existing data
   Tags.remove({});
@@ -117,9 +155,23 @@ methods.loadSmallDataset = function () {
   methods.loadProducts();
 };
 
+methods.loadLargeDataset = function () {
+  methods.resetData();
+  Logger.info("Loading Large Dataset");
+  const rawProducts = Products.rawCollection();
+  const bulk = rawProducts.initializeOrderedBulkOp();
+  const numProducts = 10;
+  for (let x = 0; x < numProducts; x++) {
+    Logger.info("Adding product");
+    methods.addProduct(bulk);
+  }
+  bulk.execute();
+};
+
 export default methods;
 
 Meteor.methods({
   "devtools/loaddata/small": methods.loadSmallDataset,
+  "devtools/loaddata/large": methods.loadLargeDataset,
   "devtools/resetData": methods.resetData
 });
