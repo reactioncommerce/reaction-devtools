@@ -94,10 +94,10 @@ methods.importProductImages = function () {
       fileObj.attachData(binary, { type: "image/jpeg", name: fileName });
       const topVariant = getTopVariant(productId);
       fileObj.metadata = {
-        productId: productId,
+        productId,
         variantId: topVariant._id,
         toGrid: 1,
-        shopId: shopId,
+        shopId,
         priority: 0,
         workflow: "published"
       };
@@ -110,7 +110,6 @@ methods.importProductImages = function () {
 methods.addProduct = function (bulk) {
   const product = productTemplate;
   const productId = Random.secret();
-  console.log("productId", typeof productId);
   const variant = variantTemplate;
   const variantId = Random.secret();
   product._id = productId;
