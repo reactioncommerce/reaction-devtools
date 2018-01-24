@@ -1,4 +1,5 @@
 import faker from "faker";
+import _ from "lodash";
 import { slugify } from "transliteration";
 import { Meteor } from "meteor/meteor";
 import { Random } from "meteor/random";
@@ -107,11 +108,12 @@ methods.importProductImages = function () {
   Logger.info("loaded product images");
 };
 
-methods.addProduct = function (bulk) {
-  const product = productTemplate;
-  const productId = Random.secret();
-  const variant = variantTemplate;
-  const variantId = Random.secret();
+methods.addProduct = function () {
+  const products = [];
+  const product = _.cloneDeep(productTemplate);
+  const productId = Random.id().toString();
+  const variant = _.cloneDeep(variantTemplate);
+  const variantId = Random.id().toString();
   product._id = productId;
   product.description = faker.lorem.paragraph();
   product.title = faker.commerce.productName();
@@ -119,25 +121,25 @@ methods.addProduct = function (bulk) {
   product.handle = slugify(product.title);
   product.createdAt = new Date();
   product.updatedAt = new Date();
-  bulk.insert(product);
-  delete product._id;
+  products.push(product);
+  // always one top level variant
   variant._id = variantId;
   variant.ancestors = [productId];
   variant.title = faker.commerce.productName();
   variant.createdAt = new Date();
   variant.updatedAt = new Date();
-  bulk.insert(variant);
-  delete variant._id;
+  products.push(variant);
   const numOptions = Random.choice([1, 2, 3, 4]);
   for (let x = 0; x < numOptions; x++) {
-    const option = optionTemplate;
+    const option = _.cloneDeep(optionTemplate);
+    const optionId = Random.id().toString();
+    option._id = optionId;
     option.optionTitle = faker.commerce.productName();
     option.price = faker.commerce.price();
     option.ancestors = [productId, variantId];
-    bulk.insert(option);
-    delete option._id;
+    products.push(option);
   }
-  return { productId, variantId };
+  return products;
 };
 
 methods.resetData = function () {
@@ -158,13 +160,17 @@ methods.loadLargeDataset = function () {
   methods.resetData();
   Logger.info("Loading Large Dataset");
   const rawProducts = Products.rawCollection();
-  const bulk = rawProducts.initializeOrderedBulkOp();
-  const numProducts = 10;
+  const products = [];
+  const numProducts = 1000;
   for (let x = 0; x < numProducts; x++) {
-    Logger.info("Adding product");
-    methods.addProduct(bulk);
+    const newProducts = methods.addProduct();
+    products.push(...newProducts);
   }
-  bulk.execute();
+  const writeOperations = products.map((product) => {
+    return { insertOne: product };
+  });
+  rawProducts.bulkWrite(writeOperations);
+  Logger.info("Dataset loaded");
 };
 
 export default methods;
