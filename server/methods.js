@@ -53,7 +53,7 @@ methods.createAdminUser = function () {
 
 methods.loadProducts = function () {
   Logger.info("Starting load Products");
-  const products = require("/imports/plugins/custom/reaction-devtools/sample-data/data/Products.json");
+  const products = require("/imports/plugins/custom/reaction-devtools/sample-data/data/small/Products.json");
   products.forEach((product) => {
     product.workflow.workflow = ["imported"]; // setting this bypasses revision control
     product.createdAt = new Date();
@@ -65,7 +65,7 @@ methods.loadProducts = function () {
 
 methods.loadTags = function () {
   Logger.info("Starting load Tags");
-  const tags = require("/imports/plugins/custom/reaction-devtools/sample-data/data/Tags.json");
+  const tags = require("/imports/plugins/custom/reaction-devtools/sample-data/data/small/Tags.json");
   tags.forEach((tag) => {
     tag.updatedAt = new Date();
     Tags.insert(tag);
@@ -156,7 +156,7 @@ methods.loadSmallDataset = function () {
   methods.loadProducts();
 };
 
-methods.loadLargeDataset = function () {
+methods.loadMediumDataset = function () {
   methods.resetData();
   Logger.info("Loading Large Dataset");
   const rawProducts = Products.rawCollection();
@@ -173,10 +173,15 @@ methods.loadLargeDataset = function () {
   Logger.info("Dataset loaded");
 };
 
+methods.loadLargeDataset = function () {
+  return true;
+};
+
 export default methods;
 
 Meteor.methods({
   "devtools/loaddata/small": methods.loadSmallDataset,
+  "devtools/loaddata/medium": methods.loadMediumDataset,
   "devtools/loaddata/large": methods.loadLargeDataset,
   "devtools/resetData": methods.resetData
 });

@@ -26,7 +26,17 @@ class DevTools extends Component {
     });
   }
 
-  handlelargeDataClick = () => {
+  handleMediumDataClick = () => {
+    Meteor.call("devtools/loaddata/medium", (error) => {
+      if (error) {
+        Alerts.toast(`Error loading medium sample data ${error.reason}`, "error");
+      } else {
+        Alerts.toast("Load medium dataset successful", "success");
+      }
+    });
+  }
+
+  handleLargeDataClick = () => {
     Meteor.call("devtools/loaddata/large", (error) => {
       if (error) {
         Alerts.toast(`Error loading large sample data ${error.reason}`, "error");
@@ -59,6 +69,19 @@ class DevTools extends Component {
           />
         </SettingsCard>
         <SettingsCard
+          title={"Medium Dataset"}
+          expanded={true}
+          showSwitch={false}
+        >
+          <Button
+            bezelStyle={"solid"}
+            primary={true}
+            label={"Load sample Produts and Tags"}
+            onClick={this.handleMediumDataClick}
+          />
+        </SettingsCard>
+
+        <SettingsCard
           title={"Large Dataset"}
           expanded={true}
           showSwitch={false}
@@ -67,7 +90,7 @@ class DevTools extends Component {
             bezelStyle={"solid"}
             primary={true}
             label={"Load sample Produts and Tags"}
-            onClick={this.handlelargeDataClick}
+            onClick={this.handleLargeDataClick}
           />
         </SettingsCard>
       </div>
