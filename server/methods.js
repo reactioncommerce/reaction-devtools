@@ -5,8 +5,7 @@ import { Meteor } from "meteor/meteor";
 import { Random } from "meteor/random";
 import { Shops, Products, ProductSearch, Tags, Media, Jobs } from "/lib/collections";
 import { Reaction, Logger } from "/server/api";
-import { productTemplate, variantTemplate, optionTemplate } from "./dataset";
-import core from "/server/api/core";
+import { productTemplate, variantTemplate, optionTemplate, tagTemplate } from "./dataset";
 
 
 const methods = {};
@@ -51,7 +50,7 @@ methods.createAdminUser = function () {
   Reaction.createDefaultAdminUser();
 };
 
-methods.loadProducts = function () {
+methods.loadSmallProducts = function () {
   Logger.info("Starting load Products");
   const products = require("/imports/plugins/custom/reaction-devtools/sample-data/data/small/Products.json");
   products.forEach((product) => {
@@ -63,7 +62,7 @@ methods.loadProducts = function () {
   Logger.info("Products loaded");
 };
 
-methods.loadTags = function () {
+methods.loadSmallTags = function () {
   Logger.info("Starting load Tags");
   const tags = require("/imports/plugins/custom/reaction-devtools/sample-data/data/small/Tags.json");
   tags.forEach((tag) => {
@@ -121,7 +120,6 @@ methods.addProduct = function () {
   product.handle = slugify(product.title);
   product.createdAt = new Date();
   product.updatedAt = new Date();
-  products.push(product);
   // always one top level variant
   variant._id = variantId;
   variant.ancestors = [productId];
@@ -130,15 +128,32 @@ methods.addProduct = function () {
   variant.updatedAt = new Date();
   products.push(variant);
   const numOptions = Random.choice([1, 2, 3, 4]);
+  const optionPrices = [];
   for (let x = 0; x < numOptions; x++) {
     const option = _.cloneDeep(optionTemplate);
     const optionId = Random.id().toString();
     option._id = optionId;
     option.optionTitle = faker.commerce.productName();
     option.price = faker.commerce.price();
+    optionPrices.push(parseFloat(option.price));
     option.ancestors = [productId, variantId];
     products.push(option);
   }
+  console.log(optionPrices);
+  const priceMin = _.min(optionPrices);
+  const priceMax = _.max(optionPrices);
+  let priceRange = `${priceMin} - ${priceMax}`;
+  // if we don't have a range
+  if (priceMin === priceMax) {
+    priceRange = priceMin.toString();
+  }
+  const priceObject = {
+    range: priceRange,
+    min: priceMin,
+    max: priceMax
+  };
+  product.price = priceObject;
+  products.push(product);
   return products;
 };
 
@@ -152,16 +167,15 @@ methods.resetData = function () {
 
 methods.loadSmallDataset = function () {
   methods.resetData();
-  methods.loadTags();
-  methods.loadProducts();
+  methods.loadSmallTags();
+  methods.loadSmallProducts();
 };
 
-methods.loadMediumDataset = function () {
+methods.loadDataset = function (numProducts = 1000) {
   methods.resetData();
-  Logger.info("Loading Large Dataset");
+  Logger.info("Loading Medium Dataset");
   const rawProducts = Products.rawCollection();
   const products = [];
-  const numProducts = 1000;
   for (let x = 0; x < numProducts; x++) {
     const newProducts = methods.addProduct();
     products.push(...newProducts);
@@ -170,11 +184,46 @@ methods.loadMediumDataset = function () {
     return { insertOne: product };
   });
   rawProducts.bulkWrite(writeOperations);
-  Logger.info("Dataset loaded");
+  // const productIds = Products.find({ type: "simple" },  { _id: 1 }).fetch();
+  // productIds.forEach((productId) => {
+  //   const priceRange = ReactionProduct.getProductPriceRange(productId);
+  //   Products.direct.update({ _id: productId }, { $set: { price: priceRange } }, { selector: { type: "simple" }, publish: true });
+  // });
+  Logger.info(`Created ${numProducts} records`);
+};
+
+methods.loadMediumTags = function (numTags) {
+  const tags = [];
+  for (let x = 0; x < numTags; x++) {
+    const tag = _.cloneDeep(tagTemplate);
+    tag.name = faker.commerce.productAdjective();
+    tag.slug = slugify(tag.name);
+    const id = Tags.insert(tag);
+    tags.push(id);
+  }
+  return tags;
+};
+
+methods.assignHashtagsToProducts = function (tags) {
+  const products = Products.find({ type: "simple" },  { _id: 1 }).fetch();
+  products.forEach((product) => {
+    const tag = Random.choice(tags);
+    Products.update({ _id: product._id }, { $set: { hashtags: [tag] , isVisible: true} }, { selector: { type: "simple" }, publish: true });
+  });
+};
+
+methods.loadMediumDataset = function () {
+  methods.resetData();
+  methods.loadDataset(1000);
+  const tags = methods.loadMediumTags(25);
+  methods.assignHashtagsToProducts(tags);
+  // try to use this to make reactivity work
+  // Products.update({}, { $set: { visible: true } }, { multi: true }, { selector: { type: "simple" }, publish: true });
 };
 
 methods.loadLargeDataset = function () {
-  return true;
+  methods.resetData();
+  methods.loadDataset(10000);
 };
 
 export default methods;

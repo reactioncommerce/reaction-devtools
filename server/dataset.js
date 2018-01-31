@@ -5,7 +5,7 @@ export const productTemplate = {
   originCountry: "US",
   requiresShipping: true,
   isDeleted: false,
-  isVisible: true,
+  isVisible: false,
   price: {
     range: "12 - 24",
     min: 12,
@@ -75,4 +75,12 @@ export const optionTemplate = {
   workflow: {
     status: "new"
   }
+};
+
+export const tagTemplate = {
+  isTopLevel: true,
+  isDeleted: false,
+  isVisible: true,
+  groups: [],
+  shopId: "J8Bhq3uTtdgwZx3rz"
 };
