@@ -140,7 +140,6 @@ methods.addProduct = function () {
     option.ancestors = [productId, variantId];
     products.push(option);
   }
-  console.log(optionPrices);
   const priceMin = _.min(optionPrices);
   const priceMax = _.max(optionPrices);
   let priceRange = `${priceMin} - ${priceMax}`;
@@ -237,10 +236,24 @@ methods.turnOnRevisions = function () {
 
 methods.assignHashtagsToProducts = function (tags) {
   const products = Products.find({ type: "simple" },  { _id: 1 }).fetch();
-  products.forEach((product) => {
-    const tag = Random.choice(tags);
-    Products.update({ _id: product._id }, { $set: { hashtags: [tag] , isVisible: true} }, { selector: { type: "simple" }, publish: true });
+  const tagIds = tags.reduce((tagArray, tag) => {
+    if (!tag.isTopLevel) {
+      tagArray.push(tag._id);
+    }
+    return tagArray;
+  }, []);
+  const rawProducts = Products.rawCollection();
+  const writeOperations = [];
+  tagIds.map((tagId) => {
+    for (let x = 0; x < 10; x++) {
+      const product = Random.choice(products);
+      const filter = { _id: product._id };
+      const update = { $addToSet: { hashtags: tagId } };
+      writeOperations.push({ updateOne: { filter, update } });
+    }
   });
+  rawProducts.bulkWrite(writeOperations);
+  Logger.info("Tags assigned");
 };
 
 methods.loadMediumDataset = function () {
@@ -248,7 +261,7 @@ methods.loadMediumDataset = function () {
   methods.resetData();
   methods.loadDataset(1000);
   const tags = methods.loadMediumTags();
-  // methods.assignHashtagsToProducts(tags);
+  methods.assignHashtagsToProducts(tags);
   // try to use this to make reactivity work
   // Products.update({}, { $set: { visible: true } }, { multi: true }, { selector: { type: "simple" }, publish: true });
   methods.turnOnRevisions();
