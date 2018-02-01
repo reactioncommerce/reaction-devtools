@@ -247,11 +247,11 @@ methods.loadMediumDataset = function () {
   methods.turnOffRevisions();
   methods.resetData();
   methods.loadDataset(1000);
-  const tags = methods.loadMediumTags(25);
+  const tags = methods.loadMediumTags();
   // methods.assignHashtagsToProducts(tags);
   // try to use this to make reactivity work
   // Products.update({}, { $set: { visible: true } }, { multi: true }, { selector: { type: "simple" }, publish: true });
-  methods.turnOffRevisions();
+  methods.turnOnRevisions();
 };
 
 methods.loadLargeDataset = function () {
