@@ -6,6 +6,7 @@ import { Random } from "meteor/random";
 import { Shops, Products, ProductSearch, Tags, Media, Jobs } from "/lib/collections";
 import { Reaction, Logger } from "/server/api";
 import { productTemplate, variantTemplate, optionTemplate, tagTemplate } from "./dataset";
+import { Packages } from "../../../../../lib/collections";
 
 
 const methods = {};
@@ -192,16 +193,46 @@ methods.loadDataset = function (numProducts = 1000) {
   Logger.info(`Created ${numProducts} records`);
 };
 
-methods.loadMediumTags = function (numTags) {
-  const tags = [];
-  for (let x = 0; x < numTags; x++) {
-    const tag = _.cloneDeep(tagTemplate);
-    tag.name = faker.commerce.productAdjective();
-    tag.slug = slugify(tag.name);
-    const id = Tags.insert(tag);
-    tags.push(id);
-  }
+// methods.loadMediumTags = function (numTags) {
+//   const tags = [];
+//   for (let x = 0; x < numTags; x++) {
+//     const tag = _.cloneDeep(tagTemplate);
+//     tag.name = faker.commerce.productAdjective();
+//     tag.slug = slugify(tag.name);
+//     const id = Tags.insert(tag);
+//     tags.push(id);
+//   }
+//   return tags;
+// };
+
+methods.loadMediumTags = function () {
+  const tags = require("/imports/plugins/custom/reaction-devtools/sample-data/data/medium/Tags.json");
+  tags.forEach((tag) => {
+    tag.updatedAt = new Date();
+    Tags.insert(tag);
+  });
+  Logger.info("Tags loaded");
   return tags;
+};
+
+methods.turnOffRevisions = function () {
+  Packages.update({
+    name: "reaction-revisions"
+  }, {
+    $set: {
+      "settings.general.enabled": false
+    }
+  });
+};
+
+methods.turnOnRevisions = function () {
+  Packages.update({
+    name: "reaction-revisions"
+  }, {
+    $set: {
+      "settings.general.enabled": true
+    }
+  });
 };
 
 methods.assignHashtagsToProducts = function (tags) {
@@ -213,12 +244,14 @@ methods.assignHashtagsToProducts = function (tags) {
 };
 
 methods.loadMediumDataset = function () {
+  methods.turnOffRevisions();
   methods.resetData();
   methods.loadDataset(1000);
   const tags = methods.loadMediumTags(25);
-  methods.assignHashtagsToProducts(tags);
+  // methods.assignHashtagsToProducts(tags);
   // try to use this to make reactivity work
   // Products.update({}, { $set: { visible: true } }, { multi: true }, { selector: { type: "simple" }, publish: true });
+  methods.turnOffRevisions();
 };
 
 methods.loadLargeDataset = function () {
