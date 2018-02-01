@@ -15,22 +15,6 @@
 	"groups": []
 },
 {
-	"_id": "rpjCvTBGjhBi2xdro",
-	"name": "Shop",
-	"slug": "shop",
-	"isTopLevel": true,
-	"updatedAt": {
-		"$date": "2014-04-09T20:23:57.412Z"
-	},
-	"createdAt": {
-		"$date": "2014-04-09T20:23:57.412Z"
-	},
-	"shopId": "J8Bhq3uTtdgwZx3rz",
-	"isDeleted": false,
-	"isVisible": true,
-	"groups": []
-},
-{
 	"_id": "abbjAn7qogHQRTsZs",
 	"name": "Apparel",
 	"slug": "apparel",
