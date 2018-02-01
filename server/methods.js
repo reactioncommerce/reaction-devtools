@@ -234,7 +234,7 @@ methods.turnOnRevisions = function () {
   });
 };
 
-methods.assignHashtagsToProducts = function (tags) {
+methods.assignHashtagsToProducts = function (tags, productPerCategory = 100) {
   const products = Products.find({ type: "simple" },  { _id: 1 }).fetch();
   const tagIds = tags.reduce((tagArray, tag) => {
     if (!tag.isTopLevel) {
@@ -245,7 +245,7 @@ methods.assignHashtagsToProducts = function (tags) {
   const rawProducts = Products.rawCollection();
   const writeOperations = [];
   tagIds.map((tagId) => {
-    for (let x = 0; x < 10; x++) {
+    for (let x = 0; x < productPerCategory; x++) {
       const product = Random.choice(products);
       const filter = { _id: product._id };
       const update = { $addToSet: { hashtags: tagId } };
