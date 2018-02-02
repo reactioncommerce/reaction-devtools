@@ -3,41 +3,20 @@ import _ from "lodash";
 import { slugify } from "transliteration";
 import { Meteor } from "meteor/meteor";
 import { Random } from "meteor/random";
-import { Shops, Products, ProductSearch, Tags, Media, Packages } from "/lib/collections";
+import { Job } from "meteor/vsivsi:job-collection";
+import { Products, ProductSearch, Tags, Media, Packages, Jobs } from "/lib/collections";
 import { Logger } from "/server/api";
 import { productTemplate, variantTemplate, optionTemplate } from "./dataset";
-import { buildProductSearch } from "/imports/plugins/included/search-mongo/server/methods/searchcollections";
 
 
 const methods = {};
 
 
-methods.loadShops = function () {
-  Logger.info("Starting load Shops");
-  const shops = require("/imports/plugins/custom/swag-shop/private/data/Shops.json");
-  shops.forEach((shop) => {
-    Shops.insert(shop);
-    Logger.info(`Inserted shop: ${shop.name}`);
-  });
-  Logger.info("Shops loaded");
-};
-
-methods.resetShops = function () {
-  const shops =   require("/imports/plugins/custom/swag-shop/private/data/Shops.json");
-  const shop = shops[0];
-  // Let's remove any shops that are not ours
-  Shops.remove({ _id: { $ne: shop._id } });
-  const rawShopCollection = Shops.rawCollection();
-  rawShopCollection.update({ _id: shop._id }, shop);
-  Logger.info("Shop reset to original values");
-};
-
-
-methods.resetMedia = () => {
+function resetMedia() {
   Media.files.direct.remove({});
-};
+}
 
-methods.loadSmallProducts = function () {
+function loadSmallProducts() {
   Logger.info("Starting load Products");
   const products = require("/imports/plugins/custom/reaction-devtools/sample-data/data/small/Products.json");
   products.forEach((product) => {
@@ -47,9 +26,9 @@ methods.loadSmallProducts = function () {
     Products.insert(product, {}, { publish: true });
   });
   Logger.info("Products loaded");
-};
+}
 
-methods.loadSmallTags = function () {
+function loadSmallTags() {
   Logger.info("Starting load Tags");
   const tags = require("/imports/plugins/custom/reaction-devtools/sample-data/data/small/Tags.json");
   tags.forEach((tag) => {
@@ -57,7 +36,7 @@ methods.loadSmallTags = function () {
     Tags.insert(tag);
   });
   Logger.info("Tags loaded");
-};
+}
 
 function getTopVariant(productId) {
   const topVariant = Products.findOne({
@@ -67,7 +46,7 @@ function getTopVariant(productId) {
   return topVariant;
 }
 
-methods.importProductImages = function () {
+function importProductImages() {
   Logger.info("Started loading product images");
   const products = Products.find({ type: "simple" }).fetch();
   for (const product of products) {
@@ -92,9 +71,9 @@ methods.importProductImages = function () {
     }
   }
   Logger.info("loaded product images");
-};
+}
 
-methods.addProduct = function () {
+function addProduct() {
   const products = [];
   const product = _.cloneDeep(productTemplate);
   const productId = Random.id().toString();
@@ -141,39 +120,28 @@ methods.addProduct = function () {
   product.price = priceObject;
   products.push(product);
   return products;
-};
+}
 
-methods.resetData = function () {
-  // delete existing data
-  Tags.remove({});
-  Products.direct.remove({});
-  ProductSearch.remove({});
-  methods.resetMedia();
-};
-
-methods.loadSmallDataset = function () {
-  methods.resetData();
-  methods.loadSmallTags();
-  methods.loadSmallProducts();
-};
-
-methods.loadDataset = function (numProducts = 1000) {
+function loadDataset(numProducts = 1000) {
   methods.resetData();
   Logger.info("Loading Medium Dataset");
   const rawProducts = Products.rawCollection();
   const products = [];
   for (let x = 0; x < numProducts; x++) {
-    const newProducts = methods.addProduct();
+    const newProducts = addProduct();
     products.push(...newProducts);
   }
   const writeOperations = products.map((product) => {
     return { insertOne: product };
   });
-  rawProducts.bulkWrite(writeOperations);
-  Logger.info(`Created ${numProducts} records`);
-};
+  rawProducts.bulkWrite(writeOperations).then(() => {
+    Logger.info(`Created ${numProducts} records`);
+  }, (error) => {
+    Logger.error(error, "Error create product record");
+  });
+}
 
-methods.loadMediumTags = function () {
+function loadMediumTags() {
   const tags = require("/imports/plugins/custom/reaction-devtools/sample-data/data/medium/Tags.json");
   tags.forEach((tag) => {
     tag.updatedAt = new Date();
@@ -181,9 +149,9 @@ methods.loadMediumTags = function () {
   });
   Logger.info("Tags loaded");
   return tags;
-};
+}
 
-methods.turnOffRevisions = function () {
+function turnOffRevisions() {
   Packages.update({
     name: "reaction-revisions"
   }, {
@@ -191,9 +159,9 @@ methods.turnOffRevisions = function () {
       "settings.general.enabled": false
     }
   });
-};
+}
 
-methods.turnOnRevisions = function () {
+function turnOnRevisions() {
   Packages.update({
     name: "reaction-revisions"
   }, {
@@ -201,9 +169,9 @@ methods.turnOnRevisions = function () {
       "settings.general.enabled": true
     }
   });
-};
+}
 
-methods.assignHashtagsToProducts = function (tags, productPerCategory = 100) {
+function assignHashtagsToProducts(tags, productPerCategory = 100) {
   const products = Products.find({ type: "simple" },  { _id: 1 }).fetch();
   const tagIds = tags.reduce((tagArray, tag) => {
     if (!tag.isTopLevel) {
@@ -223,23 +191,51 @@ methods.assignHashtagsToProducts = function (tags, productPerCategory = 100) {
   });
   rawProducts.bulkWrite(writeOperations);
   Logger.info("Tags assigned");
+}
+
+function kickoffProductSearchRebuild() {
+  new Job(Jobs, "product/buildSearchCollection", {})
+    .priority("normal")
+    .retry({
+      retries: 5,
+      wait: 60000,
+      backoff: "exponential"
+    })
+    .save({
+      cancelRepeats: true
+    });
+}
+
+methods.resetData = function () {
+  // delete existing data
+  Tags.remove({});
+  Products.direct.remove({});
+  ProductSearch.remove({});
+  resetMedia();
+};
+
+methods.loadSmallDataset = function () {
+  methods.resetData();
+  loadSmallTags();
+  loadSmallProducts();
 };
 
 methods.loadMediumDataset = function () {
-  methods.turnOffRevisions();
+  turnOffRevisions();
   methods.resetData();
-  methods.loadDataset(1000);
-  const tags = methods.loadMediumTags();
-  methods.assignHashtagsToProducts(tags);
+  loadDataset(1000);
+  const tags = loadMediumTags();
+  assignHashtagsToProducts(tags);
   // try to use this to make reactivity work
   // Products.update({}, { $set: { visible: true } }, { multi: true }, { selector: { type: "simple" }, publish: true });
-  methods.turnOnRevisions();
-  buildProductSearch();
+  turnOnRevisions();
+  kickoffProductSearchRebuild();
 };
+
 
 methods.loadLargeDataset = function () {
   methods.resetData();
-  methods.loadDataset(10000);
+  loadDataset(10000);
 };
 
 export default methods;
