@@ -3,17 +3,14 @@ import _ from "lodash";
 import { slugify } from "transliteration";
 import { Meteor } from "meteor/meteor";
 import { Random } from "meteor/random";
-import { Shops, Products, ProductSearch, Tags, Media, Jobs } from "/lib/collections";
-import { Reaction, Logger } from "/server/api";
-import { productTemplate, variantTemplate, optionTemplate, tagTemplate } from "./dataset";
-import { Packages } from "../../../../../lib/collections";
+import { Shops, Products, ProductSearch, Tags, Media, Packages } from "/lib/collections";
+import { Logger } from "/server/api";
+import { productTemplate, variantTemplate, optionTemplate } from "./dataset";
+import { buildProductSearch } from "/imports/plugins/included/search-mongo/server/methods/searchcollections";
 
 
 const methods = {};
 
-methods.cleanJobs = function () {
-  Jobs.remove({});
-};
 
 methods.loadShops = function () {
   Logger.info("Starting load Shops");
@@ -38,17 +35,6 @@ methods.resetShops = function () {
 
 methods.resetMedia = () => {
   Media.files.direct.remove({});
-};
-
-methods.resetUsers = function () {
-  const users = Meteor.users.find({});
-  users.forEach((user) => {
-    Meteor.users.remove(user._id);
-  });
-};
-
-methods.createAdminUser = function () {
-  Reaction.createDefaultAdminUser();
 };
 
 methods.loadSmallProducts = function () {
@@ -184,25 +170,8 @@ methods.loadDataset = function (numProducts = 1000) {
     return { insertOne: product };
   });
   rawProducts.bulkWrite(writeOperations);
-  // const productIds = Products.find({ type: "simple" },  { _id: 1 }).fetch();
-  // productIds.forEach((productId) => {
-  //   const priceRange = ReactionProduct.getProductPriceRange(productId);
-  //   Products.direct.update({ _id: productId }, { $set: { price: priceRange } }, { selector: { type: "simple" }, publish: true });
-  // });
   Logger.info(`Created ${numProducts} records`);
 };
-
-// methods.loadMediumTags = function (numTags) {
-//   const tags = [];
-//   for (let x = 0; x < numTags; x++) {
-//     const tag = _.cloneDeep(tagTemplate);
-//     tag.name = faker.commerce.productAdjective();
-//     tag.slug = slugify(tag.name);
-//     const id = Tags.insert(tag);
-//     tags.push(id);
-//   }
-//   return tags;
-// };
 
 methods.loadMediumTags = function () {
   const tags = require("/imports/plugins/custom/reaction-devtools/sample-data/data/medium/Tags.json");
@@ -265,6 +234,7 @@ methods.loadMediumDataset = function () {
   // try to use this to make reactivity work
   // Products.update({}, { $set: { visible: true } }, { multi: true }, { selector: { type: "simple" }, publish: true });
   methods.turnOnRevisions();
+  buildProductSearch();
 };
 
 methods.loadLargeDataset = function () {

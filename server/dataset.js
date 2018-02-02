@@ -5,7 +5,7 @@ export const productTemplate = {
   originCountry: "US",
   requiresShipping: true,
   isDeleted: false,
-  isVisible: false,
+  isVisible: true,
   price: {
     range: "12 - 24",
     min: 12,
