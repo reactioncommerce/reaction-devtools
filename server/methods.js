@@ -4,9 +4,9 @@ import { slugify } from "transliteration";
 import { Meteor } from "meteor/meteor";
 import { Random } from "meteor/random";
 import { Job } from "meteor/vsivsi:job-collection";
-import { Products, ProductSearch, Tags, Media, Packages, Jobs } from "/lib/collections";
+import { Products, ProductSearch, Tags, Media, Packages, Jobs, Orders } from "/lib/collections";
 import { Logger } from "/server/api";
-import { productTemplate, variantTemplate, optionTemplate } from "./dataset";
+import { productTemplate, variantTemplate, optionTemplate, orderTemplate } from "./dataset";
 
 
 const methods = {};
@@ -122,7 +122,28 @@ function addProduct() {
   return products;
 }
 
-function loadDataset(numProducts = 1000) {
+function addOrder() {
+  const order = _.cloneDeep(orderTemplate);
+  order._id = Random.id().toString();
+  order.createdAt = new Date();
+  const newName = `${faker.name.firstName()} ${faker.name.lastName()}`;
+  order.billing.forEach((billingRecord, index) => {
+    order.billing[index].paymentMethod.createdAt = new Date();
+    order.billing[index].address.fullName = newName;
+  });
+
+  order.shipping.forEach((shippingRecord, index) => {
+    order.shipping[index].address.fullName = newName;
+  });
+
+  order.items.forEach((item, index) => {
+    order.items[index].product.createdAt = new Date();
+    order.items[index].variants.createdAt = new Date();
+  });
+  return order;
+}
+
+function loadDataset(numProducts = 1000, numOrders = 10000) {
   methods.resetData();
   Logger.info("Loading Medium Dataset");
   const rawProducts = Products.rawCollection();
@@ -135,9 +156,24 @@ function loadDataset(numProducts = 1000) {
     return { insertOne: product };
   });
   rawProducts.bulkWrite(writeOperations).then(() => {
-    Logger.info(`Created ${numProducts} records`);
+    Logger.info(`Created ${numProducts} products`);
   }, (error) => {
-    Logger.error(error, "Error create product record");
+    Logger.error(error, "Error creating product record");
+  });
+
+  const rawOrders = Orders.rawCollection();
+  const orders = [];
+  for (let x = 0; x < numOrders; x++) {
+    const newOrder = addOrder();
+    orders.push(newOrder);
+  }
+  const writeOrderOperations = orders.map((order) => {
+    return { insertOne: order };
+  });
+  rawOrders.bulkWrite(writeOrderOperations).then(() => {
+    Logger.info(`Created ${numOrders} orders`);
+  }, (error) => {
+    Logger.error(error, "Error creating order records");
   });
 }
 
@@ -211,6 +247,7 @@ methods.resetData = function () {
   Tags.remove({});
   Products.direct.remove({});
   ProductSearch.remove({});
+  Orders.remove({});
   resetMedia();
 };
 
@@ -223,7 +260,7 @@ methods.loadSmallDataset = function () {
 methods.loadMediumDataset = function () {
   turnOffRevisions();
   methods.resetData();
-  loadDataset(1000);
+  loadDataset(1000, 10000);
   const tags = loadMediumTags();
   assignHashtagsToProducts(tags);
   // try to use this to make reactivity work
@@ -235,7 +272,7 @@ methods.loadMediumDataset = function () {
 
 methods.loadLargeDataset = function () {
   methods.resetData();
-  loadDataset(10000);
+  loadDataset(10000, 100000);
 };
 
 export default methods;
