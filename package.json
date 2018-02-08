@@ -10,6 +10,9 @@
     "type": "git",
     "url": "git+https://github.com/reactioncommerce/reaction-devtools.git"
   },
+  "dependencies": {
+    "jpeg-js": "^0.3.3"
+  },
   "babel": {
     "plugins": [
       [

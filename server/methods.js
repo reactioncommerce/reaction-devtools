@@ -1,3 +1,5 @@
+import { Buffer } from "buffer";
+import jpeg from "jpeg-js";
 import faker from "faker";
 import _ from "lodash";
 import { slugify } from "transliteration";
@@ -11,20 +13,20 @@ import { productTemplate, variantTemplate, optionTemplate, orderTemplate } from 
 
 const methods = {};
 
-
 function resetMedia() {
   Media.files.direct.remove({});
 }
 
 function loadSmallProducts() {
   Logger.info("Starting load Products");
+  turnOffRevisions();
   const products = require("/imports/plugins/custom/reaction-devtools/sample-data/data/small/Products.json");
   products.forEach((product) => {
-    product.workflow.workflow = ["imported"]; // setting this bypasses revision control
     product.createdAt = new Date();
     product.updatedAt = new Date();
     Products.insert(product, {}, { publish: true });
   });
+  turnOnRevisions();
   Logger.info("Products loaded");
 }
 
@@ -46,28 +48,58 @@ function getTopVariant(productId) {
   return topVariant;
 }
 
+/**
+ * Generates an random colored image with specified width, height and quality
+ * @param width width of the image
+ * @param height height of the image
+ * @param quality quality of the image
+ * @param callback callback
+ */
+function generateImage(width, height, quality, callback) {
+  const frameData = new Buffer(width * height * 4);
+  // const hexColors = [0x5b, 0x40, 0x29, 0xff, 0x59, 0x3e, 0x29, 0x54, 0x3c];
+  // // const color = Random.choice(hexColors);
+  // const color = Math.floor(Math.random() * 256);
+  let i = 0;
+  while (i < frameData.length) {
+    const color = Math.floor(Math.random() * 256);
+    frameData[i++] = color;
+  }
+  const rawImageData = { data: frameData, width, height };
+  const jpegImageData = jpeg.encode(rawImageData, quality);
+
+  if (jpegImageData) {
+    callback(null, jpegImageData);
+  }
+}
+
+function createProductImage(product) {
+  generateImage(600, 600, 80, (err, image) => {
+    const fileObj = new FS.File();
+    const fileName = `${product._id}.jpg`;
+    fileObj.attachData(image.data, { type: "image/jpeg", name: fileName });
+    const topVariant = getTopVariant(product._id);
+    const shopId = product.shopId;
+    fileObj.metadata = {
+      productId: product._id,
+      variantId: topVariant._id,
+      toGrid: 1,
+      shopId,
+      priority: 0,
+      workflow: "published"
+    };
+    Media.insert(fileObj);
+    Logger.info(`Wrote image for ${product._id}`);
+    return fileObj;
+  });
+}
+
 function importProductImages() {
   Logger.info("Started loading product images");
   const products = Products.find({ type: "simple" }).fetch();
   for (const product of products) {
-    const productId = product._id;
-    if (!Media.findOne({ "metadata.productId": productId })) {
-      const shopId = product.shopId;
-      const filepath = "custom/images/" + productId + ".jpg";
-      const binary = Assets.getBinary(filepath);
-      const fileObj = new FS.File();
-      const fileName = `${productId}.jpg`;
-      fileObj.attachData(binary, { type: "image/jpeg", name: fileName });
-      const topVariant = getTopVariant(productId);
-      fileObj.metadata = {
-        productId,
-        variantId: topVariant._id,
-        toGrid: 1,
-        shopId,
-        priority: 0,
-        workflow: "published"
-      };
-      Media.insert(fileObj);
+    if (!Media.findOne({ "metadata.productId": product._id })) {
+      createProductImage(product);
     }
   }
   Logger.info("loaded product images");
@@ -143,7 +175,7 @@ function addOrder() {
   return order;
 }
 
-function loadDataset(numProducts = 1000, numOrders = 10000) {
+function loadDataset(numProducts = 1000) {
   methods.resetData();
   Logger.info("Loading Medium Dataset");
   const rawProducts = Products.rawCollection();
@@ -160,7 +192,9 @@ function loadDataset(numProducts = 1000, numOrders = 10000) {
   }, (error) => {
     Logger.error(error, "Error creating product record");
   });
+}
 
+function loadOrders(numOrders = 10000) {
   const rawOrders = Orders.rawCollection();
   const orders = [];
   for (let x = 0; x < numOrders; x++) {
@@ -242,6 +276,19 @@ function kickoffProductSearchRebuild() {
     });
 }
 
+function kickoffOrderSearchRebuild() {
+  new Job(Jobs, "order/buildSearchCollection", {})
+    .priority("normal")
+    .retry({
+      retries: 5,
+      wait: 60000,
+      backoff: "exponential"
+    })
+    .save({
+      cancelRepeats: true
+    });
+}
+
 methods.resetData = function () {
   // delete existing data
   Tags.remove({});
@@ -257,29 +304,58 @@ methods.loadSmallDataset = function () {
   loadSmallProducts();
 };
 
+methods.loadSmallOrders = function () {
+  loadOrders(100);
+};
+
+methods.loadImages = function () {
+  importProductImages();
+};
+
 methods.loadMediumDataset = function () {
   turnOffRevisions();
   methods.resetData();
   loadDataset(1000, 10000);
   const tags = loadMediumTags();
   assignHashtagsToProducts(tags);
+  // importProductImages();
   // try to use this to make reactivity work
   // Products.update({}, { $set: { visible: true } }, { multi: true }, { selector: { type: "simple" }, publish: true });
   turnOnRevisions();
   kickoffProductSearchRebuild();
+  kickoffOrderSearchRebuild();
+  Logger.info("Loading Medium Dataset complete");
+};
+
+methods.loadMediumOrders = function () {
+  loadOrders(10000);
 };
 
 
 methods.loadLargeDataset = function () {
+  turnOffRevisions();
   methods.resetData();
-  loadDataset(10000, 100000);
+  loadDataset(5000);
+  turnOnRevisions();
+  kickoffProductSearchRebuild();
 };
+
+methods.loadLargeOrders = () => {
+  loadOrders(50000);
+};
+
 
 export default methods;
 
 Meteor.methods({
-  "devtools/loaddata/small": methods.loadSmallDataset,
-  "devtools/loaddata/medium": methods.loadMediumDataset,
-  "devtools/loaddata/large": methods.loadLargeDataset,
+  "devtools/loaddata/small/products": methods.loadSmallDataset,
+  "devtools/loaddata/small/orders": methods.loadSmallOrders,
+  "devtools/loaddata/small/images": methods.loadImages,
+  "devtools/loaddata/medium/products": methods.loadMediumDataset,
+  "devtools/loaddata/medim/orders": methods.loadMediumOrders,
+  "devtools/loaddata/medium/images": methods.loadImages,
+  "devtools/loaddata/large/products": methods.loadLargeDataset,
+  "devtools/loaddata/large/orders": methods.loadLargeOrders,
+  "devtools/loaddata/large/images": methods.loadImages,
   "devtools/resetData": methods.resetData
 });
