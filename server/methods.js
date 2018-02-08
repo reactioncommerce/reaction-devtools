@@ -335,7 +335,7 @@ methods.loadMediumOrders = function () {
 methods.loadLargeDataset = function () {
   turnOffRevisions();
   methods.resetData();
-  loadDataset(5000);
+  loadDataset(50000);
   turnOnRevisions();
   kickoffProductSearchRebuild();
 };
@@ -352,7 +352,7 @@ Meteor.methods({
   "devtools/loaddata/small/orders": methods.loadSmallOrders,
   "devtools/loaddata/small/images": methods.loadImages,
   "devtools/loaddata/medium/products": methods.loadMediumDataset,
-  "devtools/loaddata/medim/orders": methods.loadMediumOrders,
+  "devtools/loaddata/medium/orders": methods.loadMediumOrders,
   "devtools/loaddata/medium/images": methods.loadImages,
   "devtools/loaddata/large/products": methods.loadLargeDataset,
   "devtools/loaddata/large/orders": methods.loadLargeOrders,

@@ -161,7 +161,7 @@ class DevTools extends Component {
           <Button
             bezelStyle={"solid"}
             primary={true}
-            label={"Load Produts and Tags"}
+            label={"Load Produts and Tags (1000 products, 10000 orders)"}
             onClick={this.handleMediumDataClick}
           />
           <br />
@@ -184,7 +184,7 @@ class DevTools extends Component {
         </SettingsCard>
 
         <SettingsCard
-          title={"Large Dataset"}
+          title={"Large Dataset (50,000 products, 50,000 orders)"}
           expanded={true}
           showSwitch={false}
         >
