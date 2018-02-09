@@ -13,10 +13,20 @@ import { productTemplate, variantTemplate, optionTemplate, orderTemplate } from 
 
 const methods = {};
 
+/**
+ * @method resetMedia
+ * @summary Reset the media collection
+ * @return {undefined}
+ */
 function resetMedia() {
   Media.files.direct.remove({});
 }
 
+/**
+ * @method loadSmallProducts
+ * @summary load products from the "small" dataset
+ * @return {undefined}
+ */
 function loadSmallProducts() {
   Logger.info("Starting load Products");
   turnOffRevisions();
@@ -30,6 +40,11 @@ function loadSmallProducts() {
   Logger.info("Products loaded");
 }
 
+/**
+ * @method loadSmallTags
+ * @summary load tags from the "small" dataset
+ * @return {undefined}
+ */
 function loadSmallTags() {
   Logger.info("Starting load Tags");
   const tags = require("/imports/plugins/custom/reaction-devtools/sample-data/data/small/Tags.json");
@@ -40,6 +55,12 @@ function loadSmallTags() {
   Logger.info("Tags loaded");
 }
 
+/**
+ * @method getTopVariant
+ * @summary determine the top variant for a product to attach the image to
+ * @param {string} productId - The id for a product
+ * @returns {object} the variant object
+ */
 function getTopVariant(productId) {
   const topVariant = Products.findOne({
     "ancestors": { $in: [productId] },
@@ -49,11 +70,12 @@ function getTopVariant(productId) {
 }
 
 /**
- * Generates an random colored image with specified width, height and quality
- * @param width width of the image
- * @param height height of the image
- * @param quality quality of the image
- * @param callback callback
+ * @method generateImage
+ * @summary Generates an random colored image with specified width, height and quality
+ * @param {number} width - width of the image
+ * @param {number} height - height of the image
+ * @param {number} quality - quality of the image
+ * @param {function} callback - callback
  */
 function generateImage(width, height, quality, callback) {
   const frameData = new Buffer(width * height * 4);
@@ -72,7 +94,12 @@ function generateImage(width, height, quality, callback) {
     callback(null, jpegImageData);
   }
 }
-
+/**
+ * @method createProductImage
+ * @summary Generate a random image and attach it to each product
+ * @param {object} product - the product to attach an image to
+ * @returns {object} fileObj - the file object that's been created
+ */
 function createProductImage(product) {
   generateImage(600, 600, 80, (err, image) => {
     const fileObj = new FS.File();
@@ -94,7 +121,12 @@ function createProductImage(product) {
   });
 }
 
-function importProductImages() {
+/**
+ * @method attachProductImages
+ * @summary Generate an image and attach it to every product
+ * @returns {undefined}
+ */
+function attachProductImages() {
   Logger.info("Started loading product images");
   const products = Products.find({ type: "simple" }).fetch();
   for (const product of products) {
@@ -105,6 +137,11 @@ function importProductImages() {
   Logger.info("loaded product images");
 }
 
+/**
+ * @method addProduct
+ * @summary Generate a random product with variants and options
+ * @returns {array} products - An array of the products created
+ */
 function addProduct() {
   const products = [];
   const product = _.cloneDeep(productTemplate);
@@ -154,6 +191,11 @@ function addProduct() {
   return products;
 }
 
+/**
+ * @method addOrder
+ * @summary Add a randomized order from a template
+ * @returns {object} order - The order object
+ */
 function addOrder() {
   const order = _.cloneDeep(orderTemplate);
   order._id = Random.id().toString();
@@ -175,6 +217,11 @@ function addOrder() {
   return order;
 }
 
+/**
+ * @method loadDataset
+ * @summary load products generated from a template
+ * @param {number} [numProducts=1000] The number of products to load
+ */
 function loadDataset(numProducts = 1000) {
   methods.resetData();
   Logger.info("Loading Medium Dataset");
@@ -194,6 +241,11 @@ function loadDataset(numProducts = 1000) {
   });
 }
 
+/**
+ * @method loadOrders
+ * @summary Bulk load a number of orders
+ * @param {number} [numOrders=10000] The number of orders to load
+ */
 function loadOrders(numOrders = 10000) {
   const rawOrders = Orders.rawCollection();
   const orders = [];
@@ -211,6 +263,11 @@ function loadOrders(numOrders = 10000) {
   });
 }
 
+/**
+ * @method loadMediumTags
+ * @summary Load tags from a datafile for the "medium" dataset
+ * @returns {array} tags - An array of tags loaded from the data file
+ */
 function loadMediumTags() {
   const tags = require("/imports/plugins/custom/reaction-devtools/sample-data/data/medium/Tags.json");
   tags.forEach((tag) => {
@@ -221,6 +278,11 @@ function loadMediumTags() {
   return tags;
 }
 
+/**
+ * @method turnOffRevisions
+ * @summary temporarily turn off revisions so we can just insert data willy-nilly
+ * @returns {undefined}
+ */
 function turnOffRevisions() {
   Packages.update({
     name: "reaction-revisions"
@@ -230,7 +292,11 @@ function turnOffRevisions() {
     }
   });
 }
-
+/**
+ * @method turnOnRevisions
+ * @summary Turn revisions back on to the system functions normally
+ * @returns {undefined}
+ */
 function turnOnRevisions() {
   Packages.update({
     name: "reaction-revisions"
@@ -241,6 +307,12 @@ function turnOnRevisions() {
   });
 }
 
+/**
+ * @method assignHashtagsToProducts
+ * @summary Assign generated hashtags to products so every tags has at least 100 products
+ * @param {array} tags - An array of tags to assign
+ * @param {number} [productPerCategory=100] How many products per category
+ */
 function assignHashtagsToProducts(tags, productPerCategory = 100) {
   const products = Products.find({ type: "simple" },  { _id: 1 }).fetch();
   const tagIds = tags.reduce((tagArray, tag) => {
@@ -263,6 +335,11 @@ function assignHashtagsToProducts(tags, productPerCategory = 100) {
   Logger.info("Tags assigned");
 }
 
+/**
+ * @method kickoffProductSearchRebuild
+ * @summary Drop a job to rebuild the product search into the queue
+ * @returns {undefined}
+ */
 function kickoffProductSearchRebuild() {
   new Job(Jobs, "product/buildSearchCollection", {})
     .priority("normal")
@@ -276,6 +353,11 @@ function kickoffProductSearchRebuild() {
     });
 }
 
+/**
+ * @method kickoffOrderSearchRebuild
+ * @summary Drop a job to rebuilt the order search into the queue
+ * @returns {undefined}
+ */
 function kickoffOrderSearchRebuild() {
   new Job(Jobs, "order/buildSearchCollection", {})
     .priority("normal")
@@ -288,7 +370,11 @@ function kickoffOrderSearchRebuild() {
       cancelRepeats: true
     });
 }
-
+/**
+ * @method resetData
+ * @summary Clear out data, bypassing revision control when necessary
+ * @returns {undefined}
+ */
 methods.resetData = function () {
   // delete existing data
   Tags.remove({});
@@ -298,20 +384,40 @@ methods.resetData = function () {
   resetMedia();
 };
 
+/**
+ * @method loadSmallDataset
+ * @summary Load the "small" dataset
+ * @returns {undefined}
+ */
 methods.loadSmallDataset = function () {
   methods.resetData();
   loadSmallTags();
   loadSmallProducts();
 };
 
+/**
+ * @method loadSmallOrders
+ * @summary Load 100 orders for the "small" dataset
+ * @returns {undefined}
+ */
 methods.loadSmallOrders = function () {
   loadOrders(100);
 };
 
+/**
+ * @method loadImages
+ * @summary Generate random images and attach them to all products
+ * @returns {undefined}
+ */
 methods.loadImages = function () {
-  importProductImages();
+  attachProductImages();
 };
 
+/**
+ * @method loadMediumDataset
+ * @summary Load the "medium" dataset of products and tags
+ * @returns {undefined}
+ */
 methods.loadMediumDataset = function () {
   turnOffRevisions();
   methods.resetData();
@@ -327,11 +433,20 @@ methods.loadMediumDataset = function () {
   Logger.info("Loading Medium Dataset complete");
 };
 
+/**
+ * @method loadMediumOrders
+ * @summary Load 10000 orders for the "medium" dataset
+ * @returns {undefined}
+ */
 methods.loadMediumOrders = function () {
   loadOrders(10000);
 };
 
-
+/**
+ * @method loadLargeDataset
+ * @summary Load the "large" dataset of products and tags
+ * @returns {undefined}
+ */
 methods.loadLargeDataset = function () {
   turnOffRevisions();
   methods.resetData();
@@ -340,6 +455,11 @@ methods.loadLargeDataset = function () {
   kickoffProductSearchRebuild();
 };
 
+/**
+ * @method loadLargeOrders
+ * @summary Load 50k orders for the "large" dataset
+ * @returns {undefined}
+ */
 methods.loadLargeOrders = () => {
   loadOrders(50000);
 };
