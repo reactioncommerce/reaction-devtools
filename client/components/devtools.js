@@ -1,17 +1,26 @@
 import React, { Component } from "react";
 import { Meteor } from "meteor/meteor";
 import { composeWithTracker, registerComponent } from "@reactioncommerce/reaction-components";
-import { Divider, Button, SettingsCard } from "@reactioncommerce/reaction-ui";
+import { Button, SettingsCard } from "@reactioncommerce/reaction-ui";
 
 
 class DevTools extends Component {
-
   handleResetDataClick = () => {
     Meteor.call("devtools/resetData", (error) => {
       if (error) {
         Alerts.toast(`Error resetting sample data ${error.reason}`, "error");
       } else {
         Alerts.toast("Reset successful", "success");
+      }
+    });
+  }
+
+  handleImagesClick = () => {
+    Meteor.call("devtools/loaddata/images", (error) => {
+      if (error) {
+        Alerts.toast(`Error loading images ${error.reason}`, "error");
+      } else {
+        Alerts.toast("Images loaded successfully", "success");
       }
     });
   }
@@ -36,17 +45,6 @@ class DevTools extends Component {
     });
   }
 
-
-  handleSmallImagesClick = () => {
-    Meteor.call("devtools/loaddata/small/images", (error) => {
-      if (error) {
-        Alerts.toast(`Error loading images ${error.reason}`, "error");
-      } else {
-        Alerts.toast("Images loaded successfully", "success");
-      }
-    });
-  }
-
   handleMediumDataClick = () => {
     Meteor.call("devtools/loaddata/medium/products", (error) => {
       if (error) {
@@ -67,16 +65,6 @@ class DevTools extends Component {
     });
   }
 
-  handleMediumImagesClick = () => {
-    Meteor.call("devtools/loaddata/medium/images", (error) => {
-      if (error) {
-        Alerts.toast(`Error loading image data ${error.reason}`, "error");
-      } else {
-        Alerts.toast("Loading image data successful", "success");
-      }
-    });
-  }
-
   handleLargeDataClick = () => {
     Meteor.call("devtools/loaddata/large/products", (error) => {
       if (error) {
@@ -93,16 +81,6 @@ class DevTools extends Component {
         Alerts.toast(`Error loading large order data ${error.reason}`, "error");
       } else {
         Alerts.toast("Loading orders successful", "success");
-      }
-    });
-  }
-
-  handleLargeImagesClick = () => {
-    Meteor.call("devtools/loaddata/large/images", (error) => {
-      if (error) {
-        Alerts.toast(`Error loading large iamge data ${error.reason}`, "error");
-      } else {
-        Alerts.toast("Loading images successful", "success");
       }
     });
   }
@@ -148,20 +126,20 @@ class DevTools extends Component {
             bezelStyle={"solid"}
             primary={true}
             label={"Load Images"}
-            onClick={this.handleSmallImagesClick}
+            onClick={this.handleImagesClick}
           />
         </SettingsCard>
 
 
         <SettingsCard
-          title={"Medium Dataset"}
+          title={"Medium Dataset (1000 products, 10000 orders)"}
           expanded={true}
           showSwitch={false}
         >
           <Button
             bezelStyle={"solid"}
             primary={true}
-            label={"Load Produts and Tags (1000 products, 10000 orders)"}
+            label={"Load Produts and Tags"}
             onClick={this.handleMediumDataClick}
           />
           <br />
@@ -178,7 +156,7 @@ class DevTools extends Component {
             bezelStyle={"solid"}
             primary={true}
             label={"Load Images"}
-            onClick={this.handleMediumImagesClick}
+            onClick={this.handleImagesClick}
           />
           <div>Loading images may take some time</div>
         </SettingsCard>
@@ -200,7 +178,7 @@ class DevTools extends Component {
             bezelStyle={"solid"}
             primary={true}
             label={"Load Orders"}
-            onClick={this.handleLargeImagesClick}
+            onClick={this.handleLargeOrdersClick}
           />
           <br />
           <br />
@@ -208,7 +186,7 @@ class DevTools extends Component {
             bezelStyle={"solid"}
             primary={true}
             label={"Load Images"}
-            onClick={this.handleLargeImagesClick}
+            onClick={this.handleImagesClick}
           />
           <div>Loading images may take some time</div>
         </SettingsCard>

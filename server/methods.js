@@ -350,12 +350,10 @@ export default methods;
 Meteor.methods({
   "devtools/loaddata/small/products": methods.loadSmallDataset,
   "devtools/loaddata/small/orders": methods.loadSmallOrders,
-  "devtools/loaddata/small/images": methods.loadImages,
+  "devtools/loaddata/images": methods.loadImages,
   "devtools/loaddata/medium/products": methods.loadMediumDataset,
   "devtools/loaddata/medium/orders": methods.loadMediumOrders,
-  "devtools/loaddata/medium/images": methods.loadImages,
   "devtools/loaddata/large/products": methods.loadLargeDataset,
   "devtools/loaddata/large/orders": methods.loadLargeOrders,
-  "devtools/loaddata/large/images": methods.loadImages,
   "devtools/resetData": methods.resetData
 });
