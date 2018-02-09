@@ -85,7 +85,7 @@ function generateImage(width, height, quality, callback) {
   let i = 0;
   while (i < frameData.length) {
     const color = Math.floor(Math.random() * 256);
-    frameData[i++] = color;
+    frameData[i += 1] = color;
   }
   const rawImageData = { data: frameData, width, height };
   const jpegImageData = jpeg.encode(rawImageData, quality);
@@ -106,7 +106,7 @@ function createProductImage(product) {
     const fileName = `${product._id}.jpg`;
     fileObj.attachData(image.data, { type: "image/jpeg", name: fileName });
     const topVariant = getTopVariant(product._id);
-    const shopId = product.shopId;
+    const { shopId } = product;
     fileObj.metadata = {
       productId: product._id,
       variantId: topVariant._id,
@@ -164,7 +164,7 @@ function addProduct() {
   products.push(variant);
   const numOptions = Random.choice([1, 2, 3, 4]);
   const optionPrices = [];
-  for (let x = 0; x < numOptions; x++) {
+  for (let x = 0; x < numOptions; x += 1) {
     const option = _.cloneDeep(optionTemplate);
     const optionId = Random.id().toString();
     option._id = optionId;
@@ -227,13 +227,11 @@ function loadDataset(numProducts = 1000) {
   Logger.info("Loading Medium Dataset");
   const rawProducts = Products.rawCollection();
   const products = [];
-  for (let x = 0; x < numProducts; x++) {
+  for (let x = 0; x < numProducts; x += 1) {
     const newProducts = addProduct();
     products.push(...newProducts);
   }
-  const writeOperations = products.map((product) => {
-    return { insertOne: product };
-  });
+  const writeOperations = products.map((product) => ({ insertOne: product }));
   rawProducts.bulkWrite(writeOperations).then(() => {
     Logger.info(`Created ${numProducts} products`);
   }, (error) => {
@@ -249,13 +247,11 @@ function loadDataset(numProducts = 1000) {
 function loadOrders(numOrders = 10000) {
   const rawOrders = Orders.rawCollection();
   const orders = [];
-  for (let x = 0; x < numOrders; x++) {
+  for (let x = 0; x < numOrders; x += 1) {
     const newOrder = addOrder();
     orders.push(newOrder);
   }
-  const writeOrderOperations = orders.map((order) => {
-    return { insertOne: order };
-  });
+  const writeOrderOperations = orders.map((order) => ({ insertOne: order }));
   rawOrders.bulkWrite(writeOrderOperations).then(() => {
     Logger.info(`Created ${numOrders} orders`);
   }, (error) => {
@@ -314,7 +310,7 @@ function turnOnRevisions() {
  * @param {number} [productPerCategory=100] How many products per category
  */
 function assignHashtagsToProducts(tags, productPerCategory = 100) {
-  const products = Products.find({ type: "simple" },  { _id: 1 }).fetch();
+  const products = Products.find({ type: "simple" }, { _id: 1 }).fetch();
   const tagIds = tags.reduce((tagArray, tag) => {
     if (!tag.isTopLevel) {
       tagArray.push(tag._id);
@@ -323,8 +319,8 @@ function assignHashtagsToProducts(tags, productPerCategory = 100) {
   }, []);
   const rawProducts = Products.rawCollection();
   const writeOperations = [];
-  tagIds.map((tagId) => {
-    for (let x = 0; x < productPerCategory; x++) {
+  tagIds.forEach((tagId) => {
+    for (let x = 0; x < productPerCategory; x += 1) {
       const product = Random.choice(products);
       const filter = { _id: product._id };
       const update = { $addToSet: { hashtags: tagId } };
