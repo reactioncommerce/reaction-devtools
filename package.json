@@ -13,6 +13,12 @@
   "dependencies": {
     "jpeg-js": "^0.3.3"
   },
+  "scripts": {
+    "lint": "eslint ."
+  },
+  "eslintConfig": {
+    "extends": "@reactioncommerce"
+  },
   "babel": {
     "plugins": [
       [
@@ -45,5 +51,12 @@
       "react",
       "stage-2"
     ]
+  },
+  "devDependencies": {
+    "@reactioncommerce/eslint-config": "^1.0.1",
+    "eslint": "^4.17.0",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-jsx-a11y": "^6.0.3",
+    "eslint-plugin-react": "^7.6.1"
   }
 }
