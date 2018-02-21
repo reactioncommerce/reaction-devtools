@@ -5,7 +5,7 @@ import _ from "lodash";
 import { slugify } from "transliteration";
 import { Meteor } from "meteor/meteor";
 import { Random } from "meteor/random";
-import { Job } from "meteor/vsivsi:job-collection";
+import { Job } from "/imports/plugins/core/job-collection/lib";
 import { Products, ProductSearch, Tags, Media, Packages, Jobs, Orders } from "/lib/collections";
 import { Logger } from "/server/api";
 import { productTemplate, variantTemplate, optionTemplate, orderTemplate } from "./dataset";
@@ -386,7 +386,6 @@ methods.resetData = function () {
  * @returns {undefined}
  */
 methods.loadSmallDataset = function () {
-  methods.resetData();
   loadSmallTags();
   loadSmallProducts();
 };
