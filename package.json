@@ -11,6 +11,7 @@
     "url": "git+https://github.com/reactioncommerce/reaction-devtools.git"
   },
   "dependencies": {
+    "buffer-stream-reader": "^0.1.1",
     "jpeg-js": "^0.3.3"
   },
   "scripts": {
