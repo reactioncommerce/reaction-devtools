@@ -3,13 +3,10 @@ import jpeg from "jpeg-js";
 import faker from "faker";
 import _ from "lodash";
 import { slugify } from "transliteration";
-import bufferStreamReader from "buffer-stream-reader";
-import { FileRecord } from "@reactioncommerce/file-collections";
 import { Meteor } from "meteor/meteor";
 import { Random } from "meteor/random";
 import { Job } from "/imports/plugins/core/job-collection/lib";
-import { Media } from "/imports/plugins/core/files/server";
-import { Products, ProductSearch, Tags, Packages, Jobs, Orders } from "/lib/collections";
+import { Products, ProductSearch, Tags, Media, Packages, Jobs, Orders } from "/lib/collections";
 import { Logger } from "/server/api";
 import { productTemplate, variantTemplate, optionTemplate, orderTemplate } from "./dataset";
 
@@ -22,8 +19,7 @@ const methods = {};
  * @return {undefined}
  */
 function resetMedia() {
-  const images = Promise.await(Media.find());
-  Promise.await(Promise.all(images.map((fileRecord) => Media.remove(fileRecord))));
+  Media.files.direct.remove({});
 }
 
 /**
@@ -98,33 +94,6 @@ function generateImage(width, height, quality, callback) {
     callback(null, jpegImageData);
   }
 }
-
-async function storeFromAttachedBuffer(fileRecord) {
-  const { stores } = fileRecord.collection.options;
-  const bufferData = fileRecord.data;
-
-  // We do these in series to avoid issues with multiple streams reading
-  // from the temp store at the same time.
-  try {
-    for (const store of stores) {
-      if (fileRecord.hasStored(store.name)) {
-        return Promise.resolve();
-      }
-
-      // Make a new read stream in each loop because you can only read once
-      const readStream = new bufferStreamReader(bufferData);
-      const writeStream = await store.createWriteStream(fileRecord);
-      await new Promise((resolve, reject) => {
-        fileRecord.once("error", reject);
-        fileRecord.once("stored", resolve);
-        readStream.pipe(writeStream);
-      });
-    }
-  } catch (error) {
-    throw new Error("Error in storeFromAttachedBuffer:", error);
-  }
-}
-
 /**
  * @method createProductImage
  * @summary Generate a random image and attach it to each product
@@ -133,20 +102,12 @@ async function storeFromAttachedBuffer(fileRecord) {
  */
 function createProductImage(product) {
   generateImage(600, 600, 80, (err, image) => {
+    const fileObj = new FS.File();
     const fileName = `${product._id}.jpg`;
-    const fileRecord = new FileRecord({
-      original: {
-        name: fileName,
-        size: image.data.length,
-        type: "image/jpeg",
-        updatedAt: new Date()
-      }
-    });
-    fileRecord.attachData(image.data);
-
+    fileObj.attachData(image.data, { type: "image/jpeg", name: fileName });
     const topVariant = getTopVariant(product._id);
     const { shopId } = product;
-    fileRecord.metadata = {
+    fileObj.metadata = {
       productId: product._id,
       variantId: topVariant._id,
       toGrid: 1,
@@ -154,11 +115,9 @@ function createProductImage(product) {
       priority: 0,
       workflow: "published"
     };
-
-    Promise.await(Media.insert(fileRecord));
-    Promise.await(storeFromAttachedBuffer(fileRecord));
-
+    Media.insert(fileObj);
     Logger.info(`Wrote image for ${product._id}`);
+    return fileObj;
   });
 }
 
@@ -171,7 +130,7 @@ function attachProductImages() {
   Logger.info("Started loading product images");
   const products = Products.find({ type: "simple" }).fetch();
   for (const product of products) {
-    if (!Promise.await(Media.findOne({ "metadata.productId": product._id }))) {
+    if (!Media.findOne({ "metadata.productId": product._id })) {
       createProductImage(product);
     }
   }
