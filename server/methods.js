@@ -7,7 +7,6 @@ import { Meteor } from "meteor/meteor";
 import { Random } from "meteor/random";
 import { Job } from "/imports/plugins/core/job-collection/lib";
 import { Products, ProductSearch, Tags, Media, Packages, Jobs, Orders, Catalog } from "/lib/collections";
-import { Products, ProductSearch, Tags, Media, Packages, Jobs, Orders } from "/lib/collections";
 import { Logger } from "/server/api";
 import { productTemplate, variantTemplate, optionTemplate, orderTemplate } from "./dataset";
 import { publishProductToCatalog } from "/imports/plugins/core/catalog/server/methods/catalog";
