@@ -8,11 +8,12 @@ import { FileRecord } from "@reactioncommerce/file-collections";
 import { Meteor } from "meteor/meteor";
 import { Random } from "meteor/random";
 import { Job } from "/imports/plugins/core/job-collection/lib";
+import { Products, ProductSearch, Tags, Packages, Jobs, Orders, Catalog } from "/lib/collections";
 import { Media } from "/imports/plugins/core/files/server";
-import { Products, ProductSearch, Tags, Packages, Jobs, Orders } from "/lib/collections";
+
 import { Logger } from "/server/api";
 import { productTemplate, variantTemplate, optionTemplate, orderTemplate } from "./dataset";
-
+import { publishProductToCatalog } from "/imports/plugins/core/catalog/server/methods/catalog";
 
 const methods = {};
 
@@ -39,6 +40,7 @@ function loadSmallProducts() {
     product.createdAt = new Date();
     product.updatedAt = new Date();
     Products.insert(product, {}, { publish: true });
+    publishProductToCatalog(product._id);
   });
   turnOnRevisions();
   Logger.info("Products loaded");
@@ -173,6 +175,7 @@ function attachProductImages() {
   for (const product of products) {
     if (!Promise.await(Media.findOne({ "metadata.productId": product._id }))) {
       createProductImage(product);
+      publishProductToCatalog(product._id);
     }
   }
   Logger.info("loaded product images");
@@ -416,6 +419,7 @@ methods.resetData = function () {
   // delete existing data
   Tags.remove({});
   Products.direct.remove({});
+  Catalog.remove({});
   ProductSearch.remove({});
   Orders.remove({});
   resetMedia();
