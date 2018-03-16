@@ -40,9 +40,12 @@ function loadSmallProducts() {
     product.createdAt = new Date();
     product.updatedAt = new Date();
     Products.insert(product, {}, { publish: true });
-    publishProductToCatalog(product._id);
+    if (product.type === "simple" && product.isVisible) {
+      publishProductToCatalog(product._id);
+    }
   });
   turnOnRevisions();
+  kickoffProductSearchRebuild();
   Logger.info("Products loaded");
 }
 
