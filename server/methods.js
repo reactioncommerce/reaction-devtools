@@ -1,4 +1,6 @@
 import { Buffer } from "buffer";
+import randomPuppy from "random-puppy";
+import fetch from "node-fetch";
 import jpeg from "jpeg-js";
 import faker from "faker";
 import _ from "lodash";
@@ -39,6 +41,7 @@ function loadSmallProducts() {
   products.forEach((product) => {
     product.createdAt = new Date();
     product.updatedAt = new Date();
+    console.log("product.type", product.type);
     Products.insert(product, {}, { publish: true });
     if (product.type === "simple" && product.isVisible) {
       publishProductToCatalog(product._id);
@@ -167,6 +170,24 @@ function createProductImage(product) {
   });
 }
 
+async function createProductImageFromUrl(product) {
+  const url = Promise.await(randomPuppy());
+  console.log("url", url);
+  const fileRecord = await FileRecord.fromUrl(url, { fetch });
+  console.log("fileRecord", fileRecord);
+  const topVariant = getTopVariant(product._id);
+  const { shopId } = product;
+  fileRecord.metadata = {
+    productId: product._id,
+    variantId: topVariant._id,
+    toGrid: 1,
+    shopId,
+    priority: 0,
+    workflow: "published"
+  };
+  return Media.insert(fileRecord);
+}
+
 /**
  * @method attachProductImages
  * @summary Generate an image and attach it to every product
@@ -174,10 +195,11 @@ function createProductImage(product) {
  */
 function attachProductImages() {
   Logger.info("Started loading product images");
-  const products = Products.find({ type: "simple" }).fetch();
+  const products = Products.find({type: "simple"}).fetch();
   for (const product of products) {
-    if (!Promise.await(Media.findOne({ "metadata.productId": product._id }))) {
-      createProductImage(product);
+    if (!Promise.await(Media.findOne({"metadata.productId": product._id}))) {
+      // createProductImage(product);
+      Promise.await(createProductImageFromUrl(product));
       publishProductToCatalog(product._id);
     }
   }

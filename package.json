@@ -12,7 +12,8 @@
   },
   "dependencies": {
     "buffer-stream-reader": "^0.1.1",
-    "jpeg-js": "^0.3.3"
+    "jpeg-js": "^0.3.3",
+    "random-puppy": "^1.1.0"
   },
   "scripts": {
     "lint": "eslint ."

@@ -30,13 +30,7 @@
 	},
 	"hashtags": [
 		"hZdSevCBP8dDc66Ba"
-	],
-	"createdAt": {
-		"$date": "2018-03-16T06:55:07.123Z"
-	},
-	"updatedAt": {
-		"$date": "2018-03-16T06:55:07.123Z"
-	}
+	]
 },
 {
 	"_id": "PH8xNGE8pRHdPo8Qc",
@@ -64,12 +58,6 @@
 	"originCountry": "US",
 	"workflow": {
 		"status": "new"
-	},
-	"createdAt": {
-		"$date": "2018-03-16T06:55:07.132Z"
-	},
-	"updatedAt": {
-		"$date": "2018-03-16T06:55:07.132Z"
 	}
 },
 {
@@ -99,12 +87,6 @@
 	"originCountry": "US",
 	"workflow": {
 		"status": "new"
-	},
-	"createdAt": {
-		"$date": "2018-03-16T06:55:07.148Z"
-	},
-	"updatedAt": {
-		"$date": "2018-03-16T06:55:07.148Z"
 	}
 },
 {
@@ -134,12 +116,6 @@
 	"originCountry": "US",
 	"workflow": {
 		"status": "new"
-	},
-	"createdAt": {
-		"$date": "2018-03-16T06:55:07.168Z"
-	},
-	"updatedAt": {
-		"$date": "2018-03-16T06:55:07.168Z"
 	}
 },
 {
@@ -174,13 +150,7 @@
 	},
 	"hashtags": [
 		"hZdSevCBP8dDc66Ba"
-	],
-	"createdAt": {
-		"$date": "2018-03-16T06:55:07.184Z"
-	},
-	"updatedAt": {
-		"$date": "2018-03-16T06:55:07.184Z"
-	}
+	]
 },
 {
 	"_id": "oWNyqhaeyw9eKdZKv",
@@ -208,12 +178,6 @@
 	"originCountry": "US",
 	"workflow": {
 		"status": "new"
-	},
-	"createdAt": {
-		"$date": "2018-03-16T06:55:07.193Z"
-	},
-	"updatedAt": {
-		"$date": "2018-03-16T06:55:07.193Z"
 	}
 },
 {
@@ -243,13 +207,7 @@
 	"isBackorder": false,
 	"hashtags": [
 		"hZdSevCBP8dDc66Ba"
-	],
-	"createdAt": {
-		"$date": "2018-03-16T06:55:07.206Z"
-	},
-	"updatedAt": {
-		"$date": "2018-03-16T06:55:07.206Z"
-	}
+	]
 },
 {
 	"_id": "zhXWhcsisSexE9bg8",
@@ -277,12 +235,6 @@
 	"originCountry": "US",
 	"workflow": {
 		"status": "new"
-	},
-	"createdAt": {
-		"$date": "2018-03-16T06:55:07.215Z"
-	},
-	"updatedAt": {
-		"$date": "2018-03-16T06:55:07.215Z"
 	}
 },
 {
@@ -312,13 +264,7 @@
 	"isBackorder": true,
 	"hashtags": [
 		"hZdSevCBP8dDc66Ba"
-	],
-	"createdAt": {
-		"$date": "2018-03-16T06:55:07.225Z"
-	},
-	"updatedAt": {
-		"$date": "2018-03-16T06:55:07.225Z"
-	}
+	]
 },
 {
 	"_id": "ddzkNjFJ3MjfkzvMg",
@@ -346,12 +292,6 @@
 	"originCountry": "US",
 	"workflow": {
 		"status": "new"
-	},
-	"createdAt": {
-		"$date": "2018-03-16T06:55:07.231Z"
-	},
-	"updatedAt": {
-		"$date": "2018-03-16T06:55:07.231Z"
 	}
 },
 {
@@ -381,13 +321,7 @@
 	"isBackorder": true,
 	"hashtags": [
 		"dhqmJjXWotCNkTzxg"
-	],
-	"createdAt": {
-		"$date": "2018-03-16T06:55:07.240Z"
-	},
-	"updatedAt": {
-		"$date": "2018-03-16T06:55:07.240Z"
-	}
+	]
 },
 {
 	"_id": "78zu2u3in4rNrWtKt",
@@ -415,12 +349,6 @@
 	"originCountry": "US",
 	"workflow": {
 		"status": "new"
-	},
-	"createdAt": {
-		"$date": "2018-03-16T06:55:07.247Z"
-	},
-	"updatedAt": {
-		"$date": "2018-03-16T06:55:07.247Z"
 	}
 },
 {
@@ -450,12 +378,6 @@
 	"originCountry": "US",
 	"workflow": {
 		"status": "new"
-	},
-	"createdAt": {
-		"$date": "2018-03-16T06:55:07.255Z"
-	},
-	"updatedAt": {
-		"$date": "2018-03-16T06:55:07.255Z"
 	}
 },
 {
@@ -485,12 +407,6 @@
 	"originCountry": "US",
 	"workflow": {
 		"status": "new"
-	},
-	"createdAt": {
-		"$date": "2018-03-16T06:55:07.261Z"
-	},
-	"updatedAt": {
-		"$date": "2018-03-16T06:55:07.261Z"
 	}
 },
 {
@@ -520,12 +436,6 @@
 	"originCountry": "US",
 	"workflow": {
 		"status": "new"
-	},
-	"createdAt": {
-		"$date": "2018-03-16T06:55:07.270Z"
-	},
-	"updatedAt": {
-		"$date": "2018-03-16T06:55:07.270Z"
 	}
 },
 {
@@ -555,12 +465,6 @@
 	"originCountry": "US",
 	"workflow": {
 		"status": "new"
-	},
-	"createdAt": {
-		"$date": "2018-03-16T06:55:07.281Z"
-	},
-	"updatedAt": {
-		"$date": "2018-03-16T06:55:07.281Z"
 	}
 },
 {
@@ -590,13 +494,7 @@
 	"handle": "reaction-mens-shirt",
 	"hashtags": [
 		"dhqmJjXWotCNkTzxg"
-	],
-	"createdAt": {
-		"$date": "2018-03-16T06:55:07.299Z"
-	},
-	"updatedAt": {
-		"$date": "2018-03-16T06:55:07.299Z"
-	}
+	]
 },
 {
 	"_id": "cxYA8s8qdi8qnYSNw",
@@ -624,12 +522,6 @@
 	"originCountry": "US",
 	"workflow": {
 		"status": "new"
-	},
-	"createdAt": {
-		"$date": "2018-03-16T06:55:07.305Z"
-	},
-	"updatedAt": {
-		"$date": "2018-03-16T06:55:07.305Z"
 	}
 },
 {
@@ -659,13 +551,7 @@
 	"isVisible": true,
 	"optionTitle": "Small",
 	"width": 1,
-	"title": "SM",
-	"createdAt": {
-		"$date": "2018-03-16T06:55:07.310Z"
-	},
-	"updatedAt": {
-		"$date": "2018-03-16T06:55:07.310Z"
-	}
+	"title": "SM"
 },
 {
 	"_id": "u7BcWyqS9WHc4zDfJ",
@@ -694,13 +580,7 @@
 	"isVisible": true,
 	"optionTitle": "Medium",
 	"width": 2,
-	"title": "M",
-	"createdAt": {
-		"$date": "2018-03-16T06:55:07.318Z"
-	},
-	"updatedAt": {
-		"$date": "2018-03-16T06:55:07.318Z"
-	}
+	"title": "M"
 },
 {
 	"_id": "eJQdg8nQ3g7LJJXWJ",
@@ -729,13 +609,7 @@
 	"isVisible": true,
 	"optionTitle": "Large",
 	"width": 1,
-	"title": "L",
-	"createdAt": {
-		"$date": "2018-03-16T06:55:07.331Z"
-	},
-	"updatedAt": {
-		"$date": "2018-03-16T06:55:07.331Z"
-	}
+	"title": "L"
 },
 {
 	"_id": "RYqHfoqpQBWc53Apo",
@@ -764,13 +638,7 @@
 	"isVisible": true,
 	"optionTitle": "Extra-Large",
 	"width": 1,
-	"title": "XL",
-	"createdAt": {
-		"$date": "2018-03-16T06:55:07.342Z"
-	},
-	"updatedAt": {
-		"$date": "2018-03-16T06:55:07.342Z"
-	}
+	"title": "XL"
 },
 {
 	"_id": "9zxhE27pAvx8vbKr5",
@@ -799,13 +667,7 @@
 	"isBackorder": true,
 	"hashtags": [
 		"hZdSevCBP8dDc66Ba"
-	],
-	"createdAt": {
-		"$date": "2018-03-16T06:55:07.360Z"
-	},
-	"updatedAt": {
-		"$date": "2018-03-16T06:55:07.360Z"
-	}
+	]
 },
 {
 	"_id": "aXsSSpddrPcBWppFK",
@@ -833,12 +695,6 @@
 	"originCountry": "US",
 	"workflow": {
 		"status": "new"
-	},
-	"createdAt": {
-		"$date": "2018-03-16T06:55:07.364Z"
-	},
-	"updatedAt": {
-		"$date": "2018-03-16T06:55:07.364Z"
 	}
 },
 {
@@ -853,12 +709,6 @@
 	"isDeleted": false,
 	"shopId": "J8Bhq3uTtdgwZx3rz",
 	"template": "productDetailSimple",
-	"createdAt": {
-		"$date": "2018-03-16T06:56:02.953Z"
-	},
-	"updatedAt": {
-		"$date": "2018-03-16T07:07:37.800Z"
-	},
 	"workflow": {
 		"status": "new"
 	},
@@ -1043,13 +893,7 @@
 	"hashtags": [
 		"dhqmJjXWotCNkTzxg"
 	],
-	"handle": "reaction-camp-shirt",
-	"createdAt": {
-		"$date": "2018-03-16T07:10:27.905Z"
-	},
-	"updatedAt": {
-		"$date": "2018-03-16T07:24:13.917Z"
-	}
+	"handle": "reaction-camp-shirt"
 },
 {
 	"_id": "wxAThpm5Cv5j6ozjY",
@@ -1190,56 +1034,6 @@
 	"taxable": true,
 	"taxCode": "0000",
 	"optionTitle": "X-Large",
-	"workflow": {
-		"status": "new"
-	},
-	"originCountry": "US"
-},
-{
-	"_id": "2dQcGbDozDki2w6uy",
-	"type": "simple",
-	"isVisible": false,
-	"ancestors": [],
-	"title": "",
-	"originCountry": "US",
-	"requiresShipping": true,
-	"handle": "2dQcGbDozDki2w6uy",
-	"isDeleted": false,
-	"shopId": "J8Bhq3uTtdgwZx3rz",
-	"template": "productDetailSimple",
-	"createdAt": {
-		"$date": "2018-03-16T07:27:20.640Z"
-	},
-	"updatedAt": {
-		"$date": "2018-03-16T07:27:20.640Z"
-	},
-	"workflow": {
-		"status": "new"
-	}
-},
-{
-	"_id": "cMaH6N63myRozQgDz",
-	"type": "variant",
-	"ancestors": [
-		"2dQcGbDozDki2w6uy"
-	],
-	"price": 0,
-	"inventoryQuantity": 0,
-	"isDeleted": false,
-	"compareAtPrice": 0,
-	"weight": 0,
-	"length": 0,
-	"width": 0,
-	"height": 0,
-	"inventoryManagement": true,
-	"inventoryPolicy": false,
-	"lowInventoryWarningThreshold": 0,
-	"isVisible": false,
-	"shopId": "J8Bhq3uTtdgwZx3rz",
-	"taxable": true,
-	"taxCode": "0000",
-	"title": "",
-	"optionTitle": "Untitled Option",
 	"workflow": {
 		"status": "new"
 	},
