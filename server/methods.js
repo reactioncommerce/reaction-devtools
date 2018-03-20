@@ -172,9 +172,7 @@ function createProductImage(product) {
 
 async function createProductImageFromUrl(product) {
   const url = Promise.await(randomPuppy());
-  console.log("url", url);
   const fileRecord = await FileRecord.fromUrl(url, { fetch });
-  console.log("fileRecord", fileRecord);
   const topVariant = getTopVariant(product._id);
   const { shopId } = product;
   fileRecord.metadata = {
