@@ -25,6 +25,16 @@ class DevTools extends Component {
     });
   }
 
+  handleImagesFromWebClick = () => {
+    Meteor.call("devtools/loaddata/images", "web", (error) => {
+      if (error) {
+        Alerts.toast(`Error loading images ${error.reason}`, "error");
+      } else {
+        Alerts.toast("Images loaded successfully", "success");
+      }
+    });
+  }
+
   handleSeedDataClick = () => {
     Meteor.call("devtools/loaddata/small/products", (error) => {
       if (error) {
@@ -102,7 +112,7 @@ class DevTools extends Component {
         </SettingsCard>
 
         <SettingsCard
-          title={"Small shop data"}
+          title={"Small shop data (10 products, 100 orders"}
           expanded={true}
           showSwitch={false}
         >
@@ -127,6 +137,15 @@ class DevTools extends Component {
             primary={true}
             label={"Load Images"}
             onClick={this.handleImagesClick}
+          />
+
+          <br />
+          <br />
+          <Button
+            bezelStyle={"solid"}
+            primary={true}
+            label={"Load Puppy Images"}
+            onClick={this.handleImagesFromWebClick}
           />
         </SettingsCard>
 

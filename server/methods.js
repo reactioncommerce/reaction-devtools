@@ -1,4 +1,6 @@
 import { Buffer } from "buffer";
+import randomPuppy from "random-puppy";
+import fetch from "node-fetch";
 import jpeg from "jpeg-js";
 import faker from "faker";
 import _ from "lodash";
@@ -8,12 +10,12 @@ import { FileRecord } from "@reactioncommerce/file-collections";
 import { Meteor } from "meteor/meteor";
 import { Random } from "meteor/random";
 import { Job } from "/imports/plugins/core/job-collection/lib";
-import { Products, ProductSearch, Tags, Packages, Jobs, Orders, Catalog } from "/lib/collections";
+import { Products, ProductSearch, Tags, Packages, Jobs, Orders, OrderSearch, Catalog, MediaRecords } from "/lib/collections";
 import { Media } from "/imports/plugins/core/files/server";
-
 import { Logger } from "/server/api";
 import { productTemplate, variantTemplate, optionTemplate, orderTemplate } from "./dataset";
-import { publishProductToCatalog } from "/imports/plugins/core/catalog/server/methods/catalog";
+import { publishProductsToCatalog, publishProductToCatalog } from "/imports/plugins/core/catalog/server/methods/catalog";
+
 
 const methods = {};
 
@@ -40,9 +42,12 @@ function loadSmallProducts() {
     product.createdAt = new Date();
     product.updatedAt = new Date();
     Products.insert(product, {}, { publish: true });
-    publishProductToCatalog(product._id);
+    if (product.type === "simple" && product.isVisible) {
+      publishProductToCatalog(product._id);
+    }
   });
   turnOnRevisions();
+  kickoffProductSearchRebuild();
   Logger.info("Products loaded");
 }
 
@@ -73,6 +78,16 @@ function getTopVariant(productId) {
     "ancestors.1": { $exists: false }
   });
   return topVariant;
+}
+
+/**
+ * @method getPrimaryProduct
+ * @summary determine the top-level product for assigning product images
+ * @param {object} variant - the variant to find the parent for
+ */
+function getPrimaryProduct(variant) {
+  const parent = Products.findOne({ _id: { $in: variant.ancestors  }, type: "simple" } );
+  return parent;
 }
 
 /**
@@ -146,8 +161,49 @@ function createProductImage(product) {
     });
     fileRecord.attachData(image.data);
 
-    const topVariant = getTopVariant(product._id);
     const { shopId } = product;
+    if (product.type === "simple") {
+      const topVariant = getTopVariant(product._id);
+      fileRecord.metadata = {
+        productId: product._id,
+        variantId: topVariant._id,
+        toGrid: 1,
+        shopId,
+        priority: 0,
+        workflow: "published"
+      };
+    } else {
+      const parent = getPrimaryProduct(product);
+      fileRecord.metadata = {
+        productId: parent._id,
+        variantId: product._id,
+        toGrid: 1,
+        shopId,
+        priority: 0,
+        workflow: "published"
+      };
+    }
+
+    Promise.await(Media.insert(fileRecord));
+    Promise.await(storeFromAttachedBuffer(fileRecord));
+
+    Logger.info(`Wrote image for ${product.title}`);
+  });
+}
+
+/**
+ * @method createProductImageFromUrl
+ * @summary Pull a puppy image from the internet and attach it to a product
+ * @param {object} product - the product to attach an image to
+ * @returns {object} fileObj - the file object that's been created
+ */
+async function createProductImageFromUrl(product) {
+  console.log("adding image to ", product.title);
+  const url = await randomPuppy();
+  const fileRecord = await FileRecord.fromUrl(url, { fetch });
+  const { shopId } = product;
+  const topVariant = getTopVariant(product._id);
+  if (product.type === "simple") {
     fileRecord.metadata = {
       productId: product._id,
       variantId: topVariant._id,
@@ -156,12 +212,20 @@ function createProductImage(product) {
       priority: 0,
       workflow: "published"
     };
+  } else {
+    const parent = getPrimaryProduct(product);
+    fileRecord.metadata = {
+      productId: parent._id,
+      variantId: product._id,
+      toGrid: 1,
+      shopId,
+      priority: 0,
+      workflow: "published"
+    };
+  }
 
-    Promise.await(Media.insert(fileRecord));
-    Promise.await(storeFromAttachedBuffer(fileRecord));
+  Media.insert(fileRecord);
 
-    Logger.info(`Wrote image for ${product._id}`);
-  });
 }
 
 /**
@@ -169,16 +233,26 @@ function createProductImage(product) {
  * @summary Generate an image and attach it to every product
  * @returns {undefined}
  */
-function attachProductImages() {
+function attachProductImages(from = "random") {
   Logger.info("Started loading product images");
-  const products = Products.find({ type: "simple" }).fetch();
+  const products = Products.find({}).fetch();
+  const productIds = products.map(({ _id }) => _id);
+  const media = MediaRecords.find({ "metadata.productId": { $in: productIds } }).fetch();
+  const productIdsWithMedia = _.uniq(media.map((doc) => doc.metadata.productId));
+  let imagesAdded = [];
   for (const product of products) {
-    if (!Promise.await(Media.findOne({ "metadata.productId": product._id }))) {
-      createProductImage(product);
-      publishProductToCatalog(product._id);
+    // include top level products and options but not top-level variants
+    if (!productIdsWithMedia.includes(product._id && product.ancestors.length > 1)) {
+      if (from === "web") {
+        Promise.await(createProductImageFromUrl(product));
+      } else {
+        Promise.await(createProductImage(product));
+      }
+      imagesAdded.push(product._id);
     }
   }
   Logger.info("loaded product images");
+  // publishProductsToCatalog(imagesAdded);
 }
 
 /**
@@ -418,9 +492,10 @@ function kickoffOrderSearchRebuild() {
 methods.resetData = function () {
   // delete existing data
   Tags.remove({});
-  Products.direct.remove({});
+  Products.remove({});
   Catalog.remove({});
   ProductSearch.remove({});
+  OrderSearch.remove({});
   Orders.remove({});
   resetMedia();
 };
@@ -449,8 +524,9 @@ methods.loadSmallOrders = function () {
  * @summary Generate random images and attach them to all products
  * @returns {undefined}
  */
-methods.loadImages = function () {
-  attachProductImages();
+methods.loadImages = function (from) {
+  check(from, String);
+  attachProductImages(from);
 };
 
 /**
