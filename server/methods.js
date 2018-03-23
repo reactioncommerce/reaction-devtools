@@ -492,7 +492,7 @@ function kickoffOrderSearchRebuild() {
 methods.resetData = function () {
   // delete existing data
   Tags.remove({});
-  Products.direct.remove({});
+  Products.remove({});
   Catalog.remove({});
   ProductSearch.remove({});
   OrderSearch.remove({});
