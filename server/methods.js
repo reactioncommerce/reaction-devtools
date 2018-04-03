@@ -318,6 +318,7 @@ function addOrder() {
   const order = _.cloneDeep(orderTemplate);
   order._id = Random.id().toString();
   order.createdAt = new Date();
+  order.email = faker.internet.email();
   const newName = `${faker.name.firstName()} ${faker.name.lastName()}`;
   order.billing.forEach((billingRecord, index) => {
     order.billing[index].paymentMethod.createdAt = new Date();
