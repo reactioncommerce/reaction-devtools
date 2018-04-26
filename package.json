@@ -20,6 +20,7 @@
     "fast-crc32c": "^1.0.4",
     "jpeg-js": "^0.3.3",
     "mongodb": "^3.0.6",
+    "nodemon": "1.17.3",
     "node-random": "^1.0.1",
     "performance-now": "^2.1.0",
     "random-id": "0.0.2",

@@ -4,7 +4,7 @@ import now from "performance-now";
 import _ from "lodash";
 import slugify from "slugify";
 var fs = require("fs");
-import randomID from "random-id ";
+import randomID from "random-id";
 import { MongoClient, ObjectID, Binary } from 'mongodb';
 import { productTemplate, variantTemplate, optionTemplate, orderTemplate, filerecordTemplate, copiesTemplate, tagTemplate } from "./dataset";
 
@@ -73,7 +73,23 @@ export async function init(id) {
   const dbName = 'meteor';
   const client = await MongoClient.connect(url);
   db = client.db(dbName);
-  stores = await initialize(db);
+  stores = [
+    {
+      name: "image"
+    },
+    {
+      name: "large"
+    },
+    {
+      name: "medium"
+    },
+    {
+      name: "thumbnail"
+    },
+    {
+      name: "small"
+    },
+  ];
   Products = db.collection("Products");
   Tags = db.collection("Tags");
   Catalog = db.collection("Catalog");
@@ -81,7 +97,6 @@ export async function init(id) {
   OrderSearch = db.collection("OrderSearch");
   Orders = db.collection("Orders");
   let Cart = db.collection("Cart");
-  await Cart.copyTo("Test");
   Media = db.collection("cfs.Media.filerecord");
   // await new Promise((resolve, reject) => {
   //   fs.readFile('/Users/akarshitwal/Documents/reaction-devtools/server/image.jpg', (err, d) => {
@@ -102,10 +117,6 @@ export async function init(id) {
 }
 
 // var lock = new ReadWriteLock();
-
-class MyEmitter extends EventEmitter {}
-
-const myEmitter = new MyEmitter();
 
 const methods = {};
 
