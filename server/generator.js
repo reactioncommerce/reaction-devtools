@@ -43,7 +43,7 @@ if (cluster.isMaster) {
 
 async function start(id) {
     process.on('unhandledRejection', r => console.log(r))
-    let numPro = 10;
+    let numPro = 1000;
     const variations = [1, 2, 5, 20];
     await init(id)
     await loadDataset(numPro, variations, tagSettings);

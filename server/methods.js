@@ -315,7 +315,7 @@ async function addImage(options) {
       filerecord.metadata.shopId = option.product.shopId;
       for (const store of stores) {
         const storeName = store.name;
-        const ID = ObjectID()
+        const ID = ObjectID();
         // console.log(copiesTemplate, storeName);
         const filesTemplate = _.cloneDeep(copiesTemplate[storeName].files);
         const chunksTemplate = {
@@ -323,6 +323,7 @@ async function addImage(options) {
         }
         filesTemplate._id = ID;
         chunksTemplate.files_id = ID;
+        chunksTemplate._id = ObjectID();
         // const imageData = await createImage(storeName);
         // chunksTemplate.data = Binary(imageData);
         chunksTemplate.data = binaryCachedImages[storeName];
