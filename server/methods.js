@@ -1,21 +1,111 @@
-import { Buffer } from "buffer";
-import randomPuppy from "random-puppy";
-import fetch from "node-fetch";
-import jpeg from "jpeg-js";
 import faker from "faker";
+import sharp from "sharp";
+import now from "performance-now";
 import _ from "lodash";
-import { slugify } from "transliteration";
-import bufferStreamReader from "buffer-stream-reader";
-import { FileRecord } from "@reactioncommerce/file-collections";
-import { Meteor } from "meteor/meteor";
-import { Random } from "meteor/random";
-import { Job } from "/imports/plugins/core/job-collection/lib";
-import { Products, ProductSearch, Tags, Packages, Jobs, Orders, OrderSearch, Catalog, MediaRecords } from "/lib/collections";
-import { Media } from "/imports/plugins/core/files/server";
-import { Logger } from "/server/api";
-import { productTemplate, variantTemplate, optionTemplate, orderTemplate } from "./dataset";
-import { publishProductsToCatalog, publishProductToCatalog } from "/imports/plugins/core/catalog/server/methods/catalog";
+import slugify from "slugify";
+var fs = require("fs");
+import randomID from "random-id ";
+import { MongoClient, ObjectID, Binary } from 'mongodb';
+import { productTemplate, variantTemplate, optionTemplate, orderTemplate, filerecordTemplate, copiesTemplate, tagTemplate } from "./dataset";
 
+let Tags, Catalog, Products, ProductSearch, OrderSearch, Orders, Media, workerId = 0;;
+const storeDbs = {};
+const IPS = 7;
+let stores = null;
+let db = null;
+let data;
+let mediaBatch;
+let mediaBatchLength = 0;
+let tags = [];
+const imagesPromise = [];
+const conversionPromises = [];
+const options = [];
+let cachedImages = {};
+let binaryCachedImages = {};
+
+async function cacheImages() {
+    console.log("Caching conversions");
+    const r = Math.floor(Math.random() * 256);
+    const g = Math.floor(Math.random() * 256);
+    const b = Math.floor(Math.random() * 256);
+    cachedImages.image = await sharp({
+        create: {
+            width: 600,
+            height: 600,
+            channels: 3,
+            background: { r, g, b }
+        }
+        })
+        .jpeg()
+        .toBuffer();
+    cachedImages.large = cachedImages.image;
+    cachedImages.medium = cachedImages.image;
+    cachedImages.small = await sharp({
+        create: {
+            width: 235,
+            height: 235,
+            channels: 3,
+            background: { r, g, b }
+        }
+        })
+        .png()
+        .toBuffer();
+    cachedImages.thumbnail = await sharp({
+        create: {
+            width: 100,
+            height: 100,
+            channels: 3,
+            background: { r, g, b }
+        }
+        })
+        .png()
+        .toBuffer();
+    Object.keys(cachedImages).forEach((key) => {
+      binaryCachedImages[key] = Binary(cachedImages[key]);
+    });
+        
+}
+
+export async function init(id) {
+  // console.log("********** init ***********");
+  workerId = id;
+  const url = 'mongodb://localhost:3001/';
+  const dbName = 'meteor';
+  const client = await MongoClient.connect(url);
+  db = client.db(dbName);
+  stores = await initialize(db);
+  Products = db.collection("Products");
+  Tags = db.collection("Tags");
+  Catalog = db.collection("Catalog");
+  ProductSearch = db.collection("ProductSearch");
+  OrderSearch = db.collection("OrderSearch");
+  Orders = db.collection("Orders");
+  let Cart = db.collection("Cart");
+  await Cart.copyTo("Test");
+  Media = db.collection("cfs.Media.filerecord");
+  // await new Promise((resolve, reject) => {
+  //   fs.readFile('/Users/akarshitwal/Documents/reaction-devtools/server/image.jpg', (err, d) => {
+  //     // Encode to base64
+  //     var encodedImage = new Buffer(d, 'binary').toString('base64');
+  //     data = encodedImage;
+  //     resolve(encodedImage);
+  //   });
+  // });
+  for (const store of stores) {
+    storeDbs[store.name] = {
+      files: db.collection(`cfs_gridfs.${store.name}.files`),
+      chunks: db.collection(`cfs_gridfs.${store.name}.chunks`)
+    } 
+  };
+  mediaBatch = Media.initializeUnorderedBulkOp({useLegacyOps: true})
+  await cacheImages();
+}
+
+// var lock = new ReadWriteLock();
+
+class MyEmitter extends EventEmitter {}
+
+const myEmitter = new MyEmitter();
 
 const methods = {};
 
@@ -24,46 +114,17 @@ const methods = {};
  * @summary Reset the media collection
  * @return {undefined}
  */
-function resetMedia() {
-  const images = Promise.await(Media.find());
-  Promise.await(Promise.all(images.map((fileRecord) => Media.remove(fileRecord))));
-}
-
-/**
- * @method loadSmallProducts
- * @summary load products from the "small" dataset
- * @return {undefined}
- */
-function loadSmallProducts() {
-  Logger.info("Starting load Products");
-  turnOffRevisions();
-  const products = require("/imports/plugins/custom/reaction-devtools/sample-data/data/small/Products.json");
-  products.forEach((product) => {
-    product.createdAt = new Date();
-    product.updatedAt = new Date();
-    Products.insert(product, {}, { publish: true });
-    if (product.type === "simple" && product.isVisible) {
-      publishProductToCatalog(product._id);
-    }
-  });
-  turnOnRevisions();
-  kickoffProductSearchRebuild();
-  Logger.info("Products loaded");
-}
-
-/**
- * @method loadSmallTags
- * @summary load tags from the "small" dataset
- * @return {undefined}
- */
-function loadSmallTags() {
-  Logger.info("Starting load Tags");
-  const tags = require("/imports/plugins/custom/reaction-devtools/sample-data/data/small/Tags.json");
-  tags.forEach((tag) => {
-    tag.updatedAt = new Date();
-    Tags.insert(tag);
-  });
-  Logger.info("Tags loaded");
+async function resetMedia() {
+  await Media.remove(
+    {});
+  for (const store of stores) {
+    await db.collection(`cfs_gridfs.${store.name}.chunks`).remove({});
+    await db.collection(`cfs_gridfs.${store.name}.files`).remove({});
+  }
+  // console.log("Resetting Media")
+  // const images = await Media.find().toArray();
+  // console.log(images)
+  // await Promise.all(images.map((fileRecord) => Media.remove(fileRecord)));
 }
 
 /**
@@ -98,161 +159,49 @@ function getPrimaryProduct(variant) {
  * @param {number} quality - quality of the image
  * @param {function} callback - callback
  */
-function generateImage(width, height, quality, callback) {
-  const frameData = new Buffer(width * height * 4);
-  // const hexColors = [0x5b, 0x40, 0x29, 0xff, 0x59, 0x3e, 0x29, 0x54, 0x3c];
-  // // const color = Random.choice(hexColors);
-  // const color = Math.floor(Math.random() * 256);
-  let i = 0;
-  while (i < frameData.length) {
-    const color = Math.floor(Math.random() * 256);
-    frameData[i += 1] = color;
-  }
-  const rawImageData = { data: frameData, width, height };
-  const jpegImageData = jpeg.encode(rawImageData, quality);
-
-  if (jpegImageData) {
-    callback(null, jpegImageData);
-  }
-}
-
-async function storeFromAttachedBuffer(fileRecord) {
-  const { stores } = fileRecord.collection.options;
-  const bufferData = fileRecord.data;
-
-  // We do these in series to avoid issues with multiple streams reading
-  // from the temp store at the same time.
-  try {
-    for (const store of stores) {
-      if (fileRecord.hasStored(store.name)) {
-        return Promise.resolve();
-      }
-
-      // Make a new read stream in each loop because you can only read once
-      const readStream = new bufferStreamReader(bufferData);
-      const writeStream = await store.createWriteStream(fileRecord);
-      await new Promise((resolve, reject) => {
-        fileRecord.once("error", reject);
-        fileRecord.once("stored", resolve);
-        readStream.pipe(writeStream);
-      });
+async function createImage(storeName) {
+  const caching = true;
+  const r = Math.floor(Math.random() * 256);
+  const g = Math.floor(Math.random() * 256);
+  const b = Math.floor(Math.random() * 256);
+  if (caching) {
+    if (storeName === "small") {
+      return await sharp({
+        create: {
+            width: 235,
+            height: 235,
+            channels: 3,
+            background: { r, g, b }
+        }
+        })
+        .png()
+        .toBuffer();
     }
-  } catch (error) {
-    throw new Error("Error in storeFromAttachedBuffer:", error);
-  }
-}
-
-/**
- * @method createProductImage
- * @summary Generate a random image and attach it to each product
- * @param {object} product - the product to attach an image to
- * @returns {object} fileObj - the file object that's been created
- */
-function createProductImage(product) {
-  generateImage(600, 600, 80, (err, image) => {
-    const fileName = `${product._id}.jpg`;
-    const fileRecord = new FileRecord({
-      original: {
-        name: fileName,
-        size: image.data.length,
-        type: "image/jpeg",
-        updatedAt: new Date()
-      }
-    });
-    fileRecord.attachData(image.data);
-
-    const { shopId } = product;
-    if (product.type === "simple") {
-      const topVariant = getTopVariant(product._id);
-      fileRecord.metadata = {
-        productId: product._id,
-        variantId: topVariant._id,
-        toGrid: 1,
-        shopId,
-        priority: 0,
-        workflow: "published"
-      };
-    } else {
-      const parent = getPrimaryProduct(product);
-      fileRecord.metadata = {
-        productId: parent._id,
-        variantId: product._id,
-        toGrid: 1,
-        shopId,
-        priority: 0,
-        workflow: "published"
-      };
+    if (storeName === "thumbnail") {
+      await sharp({
+        create: {
+            width: 100,
+            height: 100,
+            channels: 3,
+            background: { r, g, b }
+        }
+        })
+        .png()
+        .toBuffer();
+      
     }
-
-    Promise.await(Media.insert(fileRecord));
-    Promise.await(storeFromAttachedBuffer(fileRecord));
-
-    Logger.info(`Wrote image for ${product.title}`);
-  });
-}
-
-/**
- * @method createProductImageFromUrl
- * @summary Pull a puppy image from the internet and attach it to a product
- * @param {object} product - the product to attach an image to
- * @returns {object} fileObj - the file object that's been created
- */
-async function createProductImageFromUrl(product) {
-  console.log("adding image to ", product.title);
-  const url = await randomPuppy();
-  const fileRecord = await FileRecord.fromUrl(url, { fetch });
-  const { shopId } = product;
-  const topVariant = getTopVariant(product._id);
-  if (product.type === "simple") {
-    fileRecord.metadata = {
-      productId: product._id,
-      variantId: topVariant._id,
-      toGrid: 1,
-      shopId,
-      priority: 0,
-      workflow: "published"
-    };
-  } else {
-    const parent = getPrimaryProduct(product);
-    fileRecord.metadata = {
-      productId: parent._id,
-      variantId: product._id,
-      toGrid: 1,
-      shopId,
-      priority: 0,
-      workflow: "published"
-    };
-  }
-
-  Media.insert(fileRecord);
-
-}
-
-/**
- * @method attachProductImages
- * @summary Generate an image and attach it to every product
- * @returns {undefined}
- */
-function attachProductImages(from = "random") {
-  Logger.info("Started loading product images");
-  const products = Products.find({}).fetch();
-  const productIds = products.map(({ _id }) => _id);
-  const media = MediaRecords.find({ "metadata.productId": { $in: productIds } }).fetch();
-  const productIdsWithMedia = _.uniq(media.map((doc) => doc.metadata.productId));
-  let imagesAdded = [];
-  for (const product of products) {
-    // include top level products and options but not top-level variants
-    if (!productIdsWithMedia.includes(product._id && product.ancestors.length > 1)) {
-      if (from === "web") {
-        Promise.await(createProductImageFromUrl(product));
-      } else {
-        Promise.await(createProductImage(product));
+    return await sharp({
+      create: {
+          width: 600,
+          height: 600,
+          channels: 3,
+          background: { r, g, b }
       }
-      imagesAdded.push(product._id);
-    }
+      })
+      .jpeg()
+      .toBuffer();
   }
-  Logger.info("loaded product images");
-  // publishProductsToCatalog(imagesAdded);
+  return cachedImages[storeName];
 }
 
 /**
@@ -260,37 +209,51 @@ function attachProductImages(from = "random") {
  * @summary Generate a random product with variants and options
  * @returns {array} products - An array of the products created
  */
-function addProduct() {
+function addProduct(batch, variantions) {
   const products = [];
   const product = _.cloneDeep(productTemplate);
-  const productId = Random.id().toString();
-  const variant = _.cloneDeep(variantTemplate);
-  const variantId = Random.id().toString();
+  const productId = randomID(10, "aA0");
   product._id = productId;
-  product.description = faker.lorem.paragraph();
-  product.title = faker.commerce.productName();
+  product.description = `${faker.lorem.paragraphs()}`;
+  product.title = `${faker.commerce.productName()}-${randomID(5, "aA0")}`;
   product.vendor = faker.company.companyName();
   product.handle = slugify(product.title);
+  product.hashtags = getTagsForProduct();
   product.createdAt = new Date();
   product.updatedAt = new Date();
   // always one top level variant
+  const variant = _.cloneDeep(variantTemplate);
+  const variantId = randomID(10, "aA0");;
   variant._id = variantId;
   variant.ancestors = [productId];
   variant.title = faker.commerce.productName();
   variant.createdAt = new Date();
   variant.updatedAt = new Date();
-  products.push(variant);
-  const numOptions = Random.choice([1, 2, 3, 4]);
+  batch.insert(variant);
+  // products.push({insertOne: variant});
+  const numOptions = variantions[Math.floor(Math.random()*variantions.length)];
   const optionPrices = [];
   for (let x = 0; x < numOptions; x += 1) {
     const option = _.cloneDeep(optionTemplate);
-    const optionId = Random.id().toString();
+    const optionId = randomID(10, "aA0");
     option._id = optionId;
     option.optionTitle = faker.commerce.productName();
     option.price = faker.commerce.price();
     optionPrices.push(parseFloat(option.price));
     option.ancestors = [productId, variantId];
-    products.push(option);
+    options.push({
+      product: {
+        _id: optionId,
+        type: option.type,
+        shopId: option.shopId
+      },
+      parentId: product._id
+    });
+    // for (var i = 0; i < IPS; i++) {
+    //   imagesPromise.push(createProductImage(option, product._id));
+    // }
+    batch.insert(option);
+    // products.push({insertOne: option});
   }
   const priceMin = _.min(optionPrices);
   const priceMax = _.max(optionPrices);
@@ -305,139 +268,160 @@ function addProduct() {
     max: priceMax
   };
   product.price = priceObject;
-  products.push(product);
-  return products;
+  batch.insert(product);
+}
+
+function getTagsForProduct() {
+  const numberOfTags = Math.ceil(Math.random() * 3);
+  let hashtags = [];
+  for (let i = 0; i < numberOfTags; i++) {
+    hashtags.push(tags[Math.floor(Math.random() * tags.length)]);
+  }
+  return hashtags;
+}
+
+async function addImage(options) {
+  // file._id = chunk.files_id = copies.store.key in string
+  const storeBatch = {}
+  Object.keys(storeDbs).forEach((key) => {
+    storeBatch[key] = {
+      files: storeDbs[key].files.initializeUnorderedBulkOp({ useLegacyOps: true }),
+      chunks: storeDbs[key].chunks.initializeUnorderedBulkOp({ useLegacyOps: true })
+    };
+  });
+  let fileRecordBatch = Media.initializeUnorderedBulkOp({ useLegacyOps: true });
+  let count = 0;
+  for (let j = 0; j < options.length; j++) {
+    const option = options[j];
+    for (let i = 0; i < IPS; i++) {
+      count++;
+      const name = `${randomID(10, "aA0")}.jpg`;
+      const filerecord = _.cloneDeep(filerecordTemplate);
+      filerecord._id = randomID(10, "aA0");
+      filerecord.original.name = name;
+      filerecord.metadata.productId = option.parentId;
+      filerecord.metadata.variantId = option.product._id;
+      filerecord.metadata.shopId = option.product.shopId;
+      for (const store of stores) {
+        const storeName = store.name;
+        const ID = ObjectID()
+        // console.log(copiesTemplate, storeName);
+        const filesTemplate = _.cloneDeep(copiesTemplate[storeName].files);
+        const chunksTemplate = _.cloneDeep(copiesTemplate[storeName].chunks);
+        filesTemplate._id = ID;
+        chunksTemplate.files_id = ID;
+        // const imageData = await createImage(storeName);
+        // chunksTemplate.data = Binary(imageData);
+        chunksTemplate.data = binaryCachedImages[storeName];
+        storeBatch[storeName].files.insert(filesTemplate);
+        storeBatch[storeName].chunks.insert(chunksTemplate);
+        filerecord.copies[storeName].key = ID.toString();
+        filerecord.copies[storeName].name = name;
+      }
+      fileRecordBatch.insert(filerecord);
+      if (count === 10000) {
+        console.log(workerId, "Saving images", j);
+        const conversionsArr = []
+        Object.keys(storeBatch).forEach((key) => {
+          conversionsArr.push(storeBatch[key].files.execute());
+          conversionsArr.push(storeBatch[key].chunks.execute());
+        });
+        await Promise.all([fileRecordBatch.execute(), ...conversionsArr])
+        count = 0;
+        fileRecordBatch = Media.initializeUnorderedBulkOp({ useLegacyOps: true });
+        Object.keys(storeBatch).forEach((key) => {
+          storeBatch[key].files = storeDbs[key].files.initializeUnorderedBulkOp({ useLegacyOps: true });
+          storeBatch[key].chunks = storeDbs[key].chunks.initializeUnorderedBulkOp({ useLegacyOps: true });
+        });
+      }
+    }
+  }
+  const conversionsArr = []
+  Object.keys(storeBatch).forEach((key) => {
+    conversionsArr.push(storeBatch[key].files.execute());
+    conversionsArr.push(storeBatch[key].chunks.execute());
+  });
+  return Promise.all([fileRecordBatch.execute(), ...conversionsArr]);
+}
+
+async function addTags(tagsSettings) {
+  let {numOfTags = 10, linkedTagsRatio = 0.2, topLevelRatio = 0.1 } = tagsSettings;
+  let batch = Tags.initializeUnorderedBulkOp({useLegacyOps: true});
+  for (let i = 0; i < numOfTags; i++) {
+    const data = _.cloneDeep(tagTemplate);
+    data._id = randomID(10, "aA0");
+    data.name = `${faker.commerce.department()}-${randomID(4, 'aA0')}`;
+    data.slug = slugify(data.name);
+    if (i === (numOfTags * topLevelRatio)) {
+      data.isTopLevel = true
+      tags.push(data._id);
+    }
+    batch.insert(data);
+  }
+  await batch.execute();
+  batch = Tags.initializeUnorderedBulkOp({useLegacyOps: true});
+  const linkedTags = numOfTags * linkedTagsRatio;
+  for (let i = 0; i < linkedTags; i++) {
+    const currentTag = tags[Math.floor(Math.random() * tags.length)]
+    const start = Math.floor(Math.random() * tags.length);
+    const len = Math.floor(Math.random() * 5);
+    const end = (start + len) > tags.length ? tags.length : (start + len)
+    const tagsToLink = tags.slice(start, end);
+    batch.find({ _id: currentTag }).updateOne({ $set: { groups: tagsToLink }});
+  }
+  return batch.execute();
 }
 
 /**
- * @method addOrder
- * @summary Add a randomized order from a template
- * @returns {object} order - The order object
- */
+* @method addOrder
+* @summary Add a randomized order from a template
+* @returns {object} order - The order object
+*/
 function addOrder() {
-  const order = _.cloneDeep(orderTemplate);
-  order._id = Random.id().toString();
-  order.createdAt = new Date();
-  order.email = faker.internet.email();
-  const newName = `${faker.name.firstName()} ${faker.name.lastName()}`;
-  order.billing.forEach((billingRecord, index) => {
-    order.billing[index].paymentMethod.createdAt = new Date();
-    order.billing[index].address.fullName = newName;
-  });
+ const order = _.cloneDeep(orderTemplate);
+ order._id = randomID(10, "aA0");
+ const currentDate = new Date();
+ const yrOldDate = new Date();
+ yrOldDate.setYear(yrOldDate.getFullYear() - 1);
+ order.createdAt = faker.date.between(yrOldDate, new Date());
+ order.email = faker.internet.email();
+ const newName = `${faker.name.firstName()} ${faker.name.lastName()}`;
+ order.billing.forEach((billingRecord, index) => {
+   order.billing[index].paymentMethod.createdAt = new Date();
+   order.billing[index].address.fullName = newName;
+ });
 
-  order.shipping.forEach((shippingRecord, index) => {
-    order.shipping[index].address.fullName = newName;
-  });
+ order.shipping.forEach((shippingRecord, index) => {
+   order.shipping[index].address.fullName = newName;
+ });
 
-  order.items.forEach((item, index) => {
-    order.items[index].product.createdAt = new Date();
-    order.items[index].variants.createdAt = new Date();
-  });
-  return order;
+ order.items.forEach((item, index) => {
+   order.items[index].product.createdAt = new Date();
+   order.items[index].variants.createdAt = new Date();
+ });
+ return order;
 }
 
-/**
- * @method loadDataset
- * @summary load products generated from a template
- * @param {number} [numProducts=1000] The number of products to load
- */
-function loadDataset(numProducts = 1000) {
-  methods.resetData();
-  Logger.info("Loading Medium Dataset");
-  const rawProducts = Products.rawCollection();
-  const products = [];
-  for (let x = 0; x < numProducts; x += 1) {
-    const newProducts = addProduct();
-    products.push(...newProducts);
-  }
-  const writeOperations = products.map((product) => ({ insertOne: product }));
-  rawProducts.bulkWrite(writeOperations).then(() => {
-    Logger.info(`Created ${numProducts} products`);
-  }, (error) => {
-    Logger.error(error, "Error creating product record");
-  });
-}
 
-/**
- * @method loadOrders
- * @summary Bulk load a number of orders
- * @param {number} [numOrders=10000] The number of orders to load
- */
-function loadOrders(numOrders = 10000) {
-  const rawOrders = Orders.rawCollection();
-  const orders = [];
-  for (let x = 0; x < numOrders; x += 1) {
-    const newOrder = addOrder();
-    orders.push(newOrder);
-  }
-  const writeOrderOperations = orders.map((order) => ({ insertOne: order }));
-  rawOrders.bulkWrite(writeOrderOperations).then(() => {
-    Logger.info(`Created ${numOrders} orders`);
-  }, (error) => {
-    Logger.error(error, "Error creating order records");
-  });
-}
-
-/**
- * @method loadMediumTags
- * @summary Load tags from a datafile for the "medium" dataset
- * @returns {array} tags - An array of tags loaded from the data file
- */
-function loadMediumTags() {
-  const tags = require("/imports/plugins/custom/reaction-devtools/sample-data/data/medium/Tags.json");
-  tags.forEach((tag) => {
-    tag.updatedAt = new Date();
-    Tags.insert(tag);
-  });
-  Logger.info("Tags loaded");
-  return tags;
-}
-
-/**
- * @method turnOffRevisions
- * @summary temporarily turn off revisions so we can just insert data willy-nilly
- * @returns {undefined}
- */
-function turnOffRevisions() {
-  Packages.update({
-    name: "reaction-revisions"
-  }, {
-    $set: {
-      "settings.general.enabled": false
+async function addOrders(numOfOrders = 1000) {
+  let batch = Orders.initializeUnorderedBulkOp({ useLegacyOps: true });
+  for (let i = 0; i < numOfOrders; i++) {
+    batch.insert(addOrder());
+    if (i % 10000 === 0) {
+      console.log(workerId, "Order Status", i, "done out of", numOfOrders);
+      await batch.execute();
+      batch = Orders.initializeUnorderedBulkOp({ useLegacyOps: true });
     }
-  });
+  }
+  return batch.execute();
 }
-/**
- * @method turnOnRevisions
- * @summary Turn revisions back on to the system functions normally
- * @returns {undefined}
- */
-function turnOnRevisions() {
-  Packages.update({
-    name: "reaction-revisions"
-  }, {
-    $set: {
-      "settings.general.enabled": true
-    }
-  });
-}
-
 /**
  * @method assignHashtagsToProducts
  * @summary Assign generated hashtags to products so every tags has at least 100 products
  * @param {array} tags - An array of tags to assign
  * @param {number} [productPerCategory=100] How many products per category
  */
-function assignHashtagsToProducts(tags, productPerCategory = 100) {
-  const products = Products.find({ type: "simple" }, { _id: 1 }).fetch();
-  const tagIds = tags.reduce((tagArray, tag) => {
-    if (!tag.isTopLevel) {
-      tagArray.push(tag._id);
-    }
-    return tagArray;
-  }, []);
-  const rawProducts = Products.rawCollection();
-  const writeOperations = [];
+function linkTagsToProducts(tags, productPerCategory = 100) {
   tagIds.forEach((tagId) => {
     for (let x = 0; x < productPerCategory; x += 1) {
       const product = Random.choice(products);
@@ -451,146 +435,66 @@ function assignHashtagsToProducts(tags, productPerCategory = 100) {
 }
 
 /**
- * @method kickoffProductSearchRebuild
- * @summary Drop a job to rebuild the product search into the queue
- * @returns {undefined}
+ * @method loadDataset
+ * @summary load products generated from a template
+ * @param {number} [numProducts=1000] The number of products to load
  */
-function kickoffProductSearchRebuild() {
-  new Job(Jobs, "product/buildSearchCollection", {})
-    .priority("normal")
-    .retry({
-      retries: 5,
-      wait: 60000,
-      backoff: "exponential"
-    })
-    .save({
-      cancelRepeats: true
-    });
+export async function loadDataset(numProducts = 1000, variantions = [1, 2, 3, 4], tagsSettings) {
+  console.log("########## loadDataset ##########");
+  const products = [];
+  // console.log("Load dataset called", Products);
+  var batch = Products.initializeUnorderedBulkOp({useLegacyOps: true});
+  let s = now();
+  let start = now();
+  let count = 0;
+  const promiseArr = []
+  const batchSize = 3;
+  console.log("Starting Tags, Orders")
+  await Promise.all([addTags(tagsSettings), addOrders(numProducts * 7)]);
+  console.log("Finished Tags, Orders in", now() - s)
+  s = now() 
+  console.log("Started making products promise");
+  for (let x = 0; x < numProducts; x += 1) {
+    addProduct(batch, variantions)
+    if (x % 3000 === 0) {
+      console.log(workerId, "Indexting products", x);
+      await batch.execute();
+      batch = Products.initializeUnorderedBulkOp({useLegacyOps: true});
+    }
+  }
+  await batch.execute();
+  console.log("Time to index products =", now() - s);
+  // const products = Products.find({ type: "variant", ancestors: { $size: 2 } }, { _id: 1, ancestors: 1 });
+  s = now();
+  await addImage(options);
+  // for (const product of options) {
+  //   for (var i = 0; i < IPS; i++) {
+  //       imagesPromise.push(createProductImage(product.product, product.parentId));
+  //   }
+  // }
+  // await Promise.all(imagesPromise)
+  console.log("Time to index images =", now() - s);
+  // s = now();
+  // console.log("Going to index conversions");
+  // mediaBatch.execute();
+  // // await Promise.all(conversionPromises);
+  // console.log("Time to index conversions =", now() - s);
+  console.log("****************** Total time = ", now() - start, "*********************")
 }
 
-/**
- * @method kickoffOrderSearchRebuild
- * @summary Drop a job to rebuilt the order search into the queue
- * @returns {undefined}
- */
-function kickoffOrderSearchRebuild() {
-  new Job(Jobs, "order/buildSearchCollection", {})
-    .priority("normal")
-    .retry({
-      retries: 5,
-      wait: 60000,
-      backoff: "exponential"
-    })
-    .save({
-      cancelRepeats: true
-    });
-}
 /**
  * @method resetData
  * @summary Clear out data, bypassing revision control when necessary
  * @returns {undefined}
  */
-methods.resetData = function () {
+export async function resetData() {
   // delete existing data
-  Tags.remove({});
-  Products.remove({});
-  Catalog.remove({});
-  ProductSearch.remove({});
-  OrderSearch.remove({});
-  Orders.remove({});
-  resetMedia();
+  await Tags.remove({});
+  await Products.remove({});
+  await Catalog.remove({});
+  await ProductSearch.remove({});
+  await OrderSearch.remove({});
+  await Orders.remove({});
+  await resetMedia();
+  console.log("Reset done");
 };
-
-/**
- * @method loadSmallDataset
- * @summary Load the "small" dataset
- * @returns {undefined}
- */
-methods.loadSmallDataset = function () {
-  loadSmallTags();
-  loadSmallProducts();
-};
-
-/**
- * @method loadSmallOrders
- * @summary Load 100 orders for the "small" dataset
- * @returns {undefined}
- */
-methods.loadSmallOrders = function () {
-  loadOrders(100);
-};
-
-/**
- * @method loadImages
- * @summary Generate random images and attach them to all products
- * @returns {undefined}
- */
-methods.loadImages = function (from) {
-  check(from, String);
-  attachProductImages(from);
-};
-
-/**
- * @method loadMediumDataset
- * @summary Load the "medium" dataset of products and tags
- * @returns {undefined}
- */
-methods.loadMediumDataset = function () {
-  turnOffRevisions();
-  methods.resetData();
-  loadDataset(1000, 10000);
-  const tags = loadMediumTags();
-  assignHashtagsToProducts(tags);
-  // importProductImages();
-  // try to use this to make reactivity work
-  // Products.update({}, { $set: { visible: true } }, { multi: true }, { selector: { type: "simple" }, publish: true });
-  turnOnRevisions();
-  kickoffProductSearchRebuild();
-  kickoffOrderSearchRebuild();
-  Logger.info("Loading Medium Dataset complete");
-};
-
-/**
- * @method loadMediumOrders
- * @summary Load 10000 orders for the "medium" dataset
- * @returns {undefined}
- */
-methods.loadMediumOrders = function () {
-  loadOrders(10000);
-};
-
-/**
- * @method loadLargeDataset
- * @summary Load the "large" dataset of products and tags
- * @returns {undefined}
- */
-methods.loadLargeDataset = function () {
-  turnOffRevisions();
-  methods.resetData();
-  loadDataset(50000);
-  turnOnRevisions();
-  kickoffProductSearchRebuild();
-};
-
-/**
- * @method loadLargeOrders
- * @summary Load 50k orders for the "large" dataset
- * @returns {undefined}
- */
-methods.loadLargeOrders = () => {
-  loadOrders(50000);
-};
-
-
-export default methods;
-
-Meteor.methods({
-  "devtools/loaddata/small/products": methods.loadSmallDataset,
-  "devtools/loaddata/small/orders": methods.loadSmallOrders,
-  "devtools/loaddata/images": methods.loadImages,
-  "devtools/loaddata/medium/products": methods.loadMediumDataset,
-  "devtools/loaddata/medium/orders": methods.loadMediumOrders,
-  "devtools/loaddata/large/products": methods.loadLargeDataset,
-  "devtools/loaddata/large/orders": methods.loadLargeOrders,
-  "devtools/resetData": methods.resetData
-});
