@@ -508,6 +508,294 @@ export const copiesTemplate = {
   }
 }
 
+export const metadata = {
+  10: [
+    {
+        "key" : "Sleek",
+        "value" : "sed"
+    },
+    {
+        "key" : "Practical",
+        "value" : "non"
+    },
+    {
+        "key" : "Refined",
+        "value" : "et"
+    },
+    {
+        "key" : "Handcrafted",
+        "value" : "illum"
+    },
+    {
+        "key" : "Ergonomic",
+        "value" : "dolor"
+    },
+    {
+        "key" : "Licensed",
+        "value" : "laborum"
+    },
+    {
+        "key" : "Awesome",
+        "value" : "voluptas"
+    },
+    {
+        "key" : "Refined",
+        "value" : "sapiente"
+    },
+    {
+        "key" : "Handmade",
+        "value" : "voluptatem"
+    },
+    {
+        "key" : "Handmade",
+        "value" : "veritatis"
+    }
+  ],
+  20: [
+    {
+        "key" : "Tasty",
+        "value" : "qui"
+    },
+    {
+        "key" : "Incredible",
+        "value" : "aut"
+    },
+    {
+        "key" : "Rustic",
+        "value" : "et"
+    },
+    {
+        "key" : "Generic",
+        "value" : "enim"
+    },
+    {
+        "key" : "Handcrafted",
+        "value" : "voluptate"
+    },
+    {
+        "key" : "Generic",
+        "value" : "labore"
+    },
+    {
+        "key" : "Tasty",
+        "value" : "eaque"
+    },
+    {
+        "key" : "Tasty",
+        "value" : "sapiente"
+    },
+    {
+        "key" : "Intelligent",
+        "value" : "praesentium"
+    },
+    {
+        "key" : "Incredible",
+        "value" : "illum"
+    },
+    {
+        "key" : "Fantastic",
+        "value" : "doloribus"
+    },
+    {
+        "key" : "Practical",
+        "value" : "voluptatem"
+    },
+    {
+        "key" : "Awesome",
+        "value" : "perspiciatis"
+    },
+    {
+        "key" : "Incredible",
+        "value" : "qui"
+    },
+    {
+        "key" : "Unbranded",
+        "value" : "reprehenderit"
+    },
+    {
+        "key" : "Fantastic",
+        "value" : "beatae"
+    },
+    {
+        "key" : "Small",
+        "value" : "quis"
+    },
+    {
+        "key" : "Tasty",
+        "value" : "placeat"
+    },
+    {
+        "key" : "Unbranded",
+        "value" : "autem"
+    },
+    {
+        "key" : "Unbranded",
+        "value" : "molestiae"
+    }
+  ],
+  40: [
+    {
+        "key" : "Handcrafted",
+        "value" : "aut"
+    },
+    {
+        "key" : "Gorgeous",
+        "value" : "quaerat"
+    },
+    {
+        "key" : "Ergonomic",
+        "value" : "sint"
+    },
+    {
+        "key" : "Tasty",
+        "value" : "impedit"
+    },
+    {
+        "key" : "Licensed",
+        "value" : "molestiae"
+    },
+    {
+        "key" : "Handmade",
+        "value" : "consectetur"
+    },
+    {
+        "key" : "Incredible",
+        "value" : "exercitationem"
+    },
+    {
+        "key" : "Awesome",
+        "value" : "dolor"
+    },
+    {
+        "key" : "Handcrafted",
+        "value" : "est"
+    },
+    {
+        "key" : "Handmade",
+        "value" : "molestiae"
+    },
+    {
+        "key" : "Handmade",
+        "value" : "ipsum"
+    },
+    {
+        "key" : "Refined",
+        "value" : "et"
+    },
+    {
+        "key" : "Handmade",
+        "value" : "ad"
+    },
+    {
+        "key" : "Tasty",
+        "value" : "placeat"
+    },
+    {
+        "key" : "Ergonomic",
+        "value" : "illo"
+    },
+    {
+        "key" : "Awesome",
+        "value" : "dolore"
+    },
+    {
+        "key" : "Handmade",
+        "value" : "vitae"
+    },
+    {
+        "key" : "Rustic",
+        "value" : "ut"
+    },
+    {
+        "key" : "Fantastic",
+        "value" : "voluptatem"
+    },
+    {
+        "key" : "Small",
+        "value" : "ducimus"
+    },
+    {
+        "key" : "Practical",
+        "value" : "quia"
+    },
+    {
+        "key" : "Refined",
+        "value" : "minus"
+    },
+    {
+        "key" : "Ergonomic",
+        "value" : "est"
+    },
+    {
+        "key" : "Practical",
+        "value" : "ipsa"
+    },
+    {
+        "key" : "Intelligent",
+        "value" : "enim"
+    },
+    {
+        "key" : "Rustic",
+        "value" : "qui"
+    },
+    {
+        "key" : "Handcrafted",
+        "value" : "et"
+    },
+    {
+        "key" : "Fantastic",
+        "value" : "nemo"
+    },
+    {
+        "key" : "Fantastic",
+        "value" : "consequatur"
+    },
+    {
+        "key" : "Fantastic",
+        "value" : "tenetur"
+    },
+    {
+        "key" : "Gorgeous",
+        "value" : "culpa"
+    },
+    {
+        "key" : "Handmade",
+        "value" : "unde"
+    },
+    {
+        "key" : "Unbranded",
+        "value" : "totam"
+    },
+    {
+        "key" : "Incredible",
+        "value" : "et"
+    },
+    {
+        "key" : "Handmade",
+        "value" : "fuga"
+    },
+    {
+        "key" : "Gorgeous",
+        "value" : "et"
+    },
+    {
+        "key" : "Tasty",
+        "value" : "et"
+    },
+    {
+        "key" : "Awesome",
+        "value" : "cumque"
+    },
+    {
+        "key" : "Handcrafted",
+        "value" : "ut"
+    },
+    {
+        "key" : "Handcrafted",
+        "value" : "eum"
+    }
+  ]
+};
 /*
 file._id = chunk.files_id = copies.store.key
 */

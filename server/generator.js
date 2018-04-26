@@ -5,23 +5,36 @@ import now from "performance-now";
 const numCPUs = require('os').cpus().length;
 import { loadDataset, init, resetData } from "./methods";
 
-const tagSettings = {
-    numOfTags: 250
+const dev = {
+    products: 1000,
+    orders: 1000,
+    tags: 10,
+    variations: [1, 2, 4, 5],
+    IPS: 3,
+    attributes: 10,
+    duration: 1
 }
-/*
-37500 for mid -> 50 sec
-124521 for ent
+const mid = {
+    products: 300000,
+    orders: 2100000,
+    tags: 1000,
+    variations: [1, 2, 5, 20],
+    IPS: 7,
+    attributes: 20,
+    duration: 3
+}
+const ent = {
+    products: 1000000,
+    orders: 52000000,
+    tags: 4000,
+    variations: [1, 2, 5, 200],
+    IPS: 9,
+    attributes: 40,
+    duration: 3
+}
 
-60000 -> order, spread over a year
-60000 -> accounta
-*/
-// try {
-//     start(1)
-// } catch (err) {
-//     console.err(err);
-// }
 if (cluster.isMaster) {
-//     //   Fork workers.   
+    //   Fork workers.   
     init().then(() => {
         return resetData();
     })
@@ -43,74 +56,11 @@ if (cluster.isMaster) {
 
 async function start(id) {
     process.on('unhandledRejection', r => console.log(r))
-    let numPro = 1000;
-    const variations = [1, 2, 5, 20];
-    await init(id)
-    await loadDataset(numPro, variations, tagSettings);
+    const settings = dev;
+    settings.products = Math.ceil(settings.products / numCPUs);
+    settings.orders = Math.ceil(settings.orders / numCPUs);
+    settings.tags = Math.ceil(settings.tags / numCPUs);
+    await init(id, settings);
+    await loadDataset();
     console.log(id, Date.now())
 }
-// var Worker = require('webworker-threads').Worker;
- 
-
-
-// async function start() {
-//     // Connection url
-//     const url = 'mongodb://localhost:3001';
-//     // Database Name
-//     const dbName = 'meteor';
-//     // Connect using MongoClient
-//     const client = await MongoClient.connect(url)
-//     const db = client.db(dbName);
-//     // Use the admin database for the operation
-//     const collection = db.collection('Accounts');
-//     // Find some documents
-//     console.log(await collection.find({}).toArray());
-//     return db;
-// }
-// async function load() {
-//     await methods.resetData();    
-//     let numPro = 50000;
-//     const variations = [1, 2, 5, 20];
-//     const numWork = 3;
-//     console.log("Number of products =", numPro);
-//     for (var i = 0; i < numWork; i++) {
-//         // You may also pass in a function:
-//         var worker = new Worker(() => {
-//             this.onmessage = async function(event) {
-//                 console.log("Got message");
-//                 const { nP } = event.data;
-//                 await loadDataset(nP, variations);
-//                 self.close();
-//             };
-//         });
-//         worker.postMessage({nP: numPro});
-//     }
-//     // proArray = [];
-//     // let s = now();
-//     // for (var i = 0; i < nP / 2000; i += 1) {
-//     //     proArray.push(loadDataset(2000, variations));
-//     // }
-//     // await Promise.all(proArray);
-//     // console.log("Total time =", now() - s);
-//     // nP = 10000;
-//     // console.log("Number of products =", nP);
-//     // await loadDataset(numPro, variations);
-// }
-
-// // load()
-
-// // // You may also pass in a function:
-// // var worker = new Worker(function(){
-// //     this.onmessage = function(event) {
-// //         let numPro = 5000;
-// //     const variations = [1, 2, 5, 20];
-// //       loadDataset(numPro, variations)
-// //       .then(console.log)
-// //       .catch(console.log)
-// //     //   self.close();
-// //     };
-// //   });
-// //   worker.postMessage('ali');
-// // "babel-cli": "^6.26.0",
-// //     "babel-preset-es2015": "^6.24.1",
-// //     "babel-preset-stage-2": "^6.24.1",

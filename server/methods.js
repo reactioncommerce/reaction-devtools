@@ -6,11 +6,11 @@ import slugify from "slugify";
 var fs = require("fs");
 import randomID from "random-id";
 import { MongoClient, ObjectID, Binary } from 'mongodb';
-import { productTemplate, variantTemplate, optionTemplate, orderTemplate, filerecordTemplate, copiesTemplate, tagTemplate } from "./dataset";
+import { productTemplate, variantTemplate, optionTemplate, orderTemplate, filerecordTemplate, copiesTemplate, tagTemplate, metadata } from "./dataset";
 
 let Tags, Catalog, Products, ProductSearch, OrderSearch, Orders, Media, workerId = 0;;
+let settings = {};
 const storeDbs = {};
-const IPS = 7;
 let stores = null;
 let db = null;
 let data;
@@ -66,13 +66,14 @@ async function cacheImages() {
         
 }
 
-export async function init(id) {
+export async function init(id, sett) {
   // console.log("********** init ***********");
   workerId = id;
   const url = 'mongodb://localhost:3001/';
   const dbName = 'meteor';
   const client = await MongoClient.connect(url);
   db = client.db(dbName);
+  settings = sett;
   stores = [
     {
       name: "image"
@@ -172,10 +173,11 @@ function getPrimaryProduct(variant) {
  */
 async function createImage(storeName) {
   const caching = true;
+  console.log("Store name is ", storeName);
   const r = Math.floor(Math.random() * 256);
   const g = Math.floor(Math.random() * 256);
   const b = Math.floor(Math.random() * 256);
-  if (!caching) {
+  if (caching) {
     if (storeName === "small") {
       return await sharp({
         create: {
@@ -220,7 +222,7 @@ async function createImage(storeName) {
  * @summary Generate a random product with variants and options
  * @returns {array} products - An array of the products created
  */
-function addProduct(batch, variantions) {
+function addProduct(batch) {
   const products = [];
   const product = _.cloneDeep(productTemplate);
   const productId = randomID(10, "aA0");
@@ -232,6 +234,7 @@ function addProduct(batch, variantions) {
   product.hashtags = getTagsForProduct();
   product.createdAt = new Date();
   product.updatedAt = new Date();
+  product.metadata = metadata[settings.attributes];
   // always one top level variant
   const variant = _.cloneDeep(variantTemplate);
   const variantId = randomID(10, "aA0");;
@@ -241,8 +244,7 @@ function addProduct(batch, variantions) {
   variant.createdAt = new Date();
   variant.updatedAt = new Date();
   batch.insert(variant);
-  // products.push({insertOne: variant});
-  const numOptions = variantions[Math.floor(Math.random()*variantions.length)];
+  const numOptions = settings.variations[Math.floor(Math.random()*settings.variations.length)];
   const optionPrices = [];
   for (let x = 0; x < numOptions; x += 1) {
     const option = _.cloneDeep(optionTemplate);
@@ -304,7 +306,7 @@ async function addImage(options) {
   let count = 0;
   for (let j = 0; j < options.length; j++) {
     const option = options[j];
-    for (let i = 0; i < IPS; i++) {
+    for (let i = 0; i < settings.IPS; i++) {
       count++;
       const name = `${randomID(10, "aA0")}.jpg`;
       const filerecord = _.cloneDeep(filerecordTemplate);
@@ -319,11 +321,10 @@ async function addImage(options) {
         // console.log(copiesTemplate, storeName);
         const filesTemplate = _.cloneDeep(copiesTemplate[storeName].files);
         const chunksTemplate = {
-          n: "0"
+          n: 0
         }
         filesTemplate._id = ID;
         chunksTemplate.files_id = ID;
-        chunksTemplate._id = ObjectID();
         // const imageData = await createImage(storeName);
         // chunksTemplate.data = Binary(imageData);
         chunksTemplate.data = binaryCachedImages[storeName];
@@ -334,7 +335,7 @@ async function addImage(options) {
       }
       fileRecordBatch.insert(filerecord);
       if (count === 10000) {
-        console.log(workerId, "Saving images", j);
+        console.log(workerId, "Saving images", j, "of", options.length);
         const conversionsArr = []
         Object.keys(storeBatch).forEach((key) => {
           conversionsArr.push(storeBatch[key].files.execute());
@@ -358,15 +359,19 @@ async function addImage(options) {
   return Promise.all([fileRecordBatch.execute(), ...conversionsArr]);
 }
 
-async function addTags(tagsSettings) {
-  let {numOfTags = 10, linkedTagsRatio = 0.2, topLevelRatio = 0.1 } = tagsSettings;
+async function addTags() {
+  let numOfTags = settings.tags;
+  const linkedTagsRatio = 0.2;
+  const topLevelRatio = 0.1;
   let batch = Tags.initializeUnorderedBulkOp({useLegacyOps: true});
   for (let i = 0; i < numOfTags; i++) {
     const data = _.cloneDeep(tagTemplate);
     data._id = randomID(10, "aA0");
     data.name = `${faker.commerce.department()}-${randomID(4, 'aA0')}`;
     data.slug = slugify(data.name);
-    if (i === (numOfTags * topLevelRatio)) {
+    data.createdAt = new Date();
+    data.updatedAt = new Date();
+    if (i === Math.round(numOfTags * topLevelRatio)) {
       data.isTopLevel = true
       tags.push(data._id);
     }
@@ -396,7 +401,7 @@ function addOrder() {
  order._id = randomID(10, "aA0");
  const currentDate = new Date();
  const yrOldDate = new Date();
- yrOldDate.setYear(yrOldDate.getFullYear() - 1);
+ yrOldDate.setYear(yrOldDate.getFullYear() - settings.duration);
  order.createdAt = faker.date.between(yrOldDate, new Date());
  order.email = faker.internet.email();
  const newName = `${faker.name.firstName()} ${faker.name.lastName()}`;
@@ -417,7 +422,8 @@ function addOrder() {
 }
 
 
-async function addOrders(numOfOrders = 1000) {
+async function addOrders() {
+  const numOfOrders = settings.orders || 1000;
   let batch = Orders.initializeUnorderedBulkOp({ useLegacyOps: true });
   for (let i = 0; i < numOfOrders; i++) {
     batch.insert(addOrder());
@@ -429,31 +435,13 @@ async function addOrders(numOfOrders = 1000) {
   }
   return batch.execute();
 }
-/**
- * @method assignHashtagsToProducts
- * @summary Assign generated hashtags to products so every tags has at least 100 products
- * @param {array} tags - An array of tags to assign
- * @param {number} [productPerCategory=100] How many products per category
- */
-function linkTagsToProducts(tags, productPerCategory = 100) {
-  tagIds.forEach((tagId) => {
-    for (let x = 0; x < productPerCategory; x += 1) {
-      const product = Random.choice(products);
-      const filter = { _id: product._id };
-      const update = { $addToSet: { hashtags: tagId } };
-      writeOperations.push({ updateOne: { filter, update } });
-    }
-  });
-  rawProducts.bulkWrite(writeOperations);
-  Logger.info("Tags assigned");
-}
 
 /**
  * @method loadDataset
  * @summary load products generated from a template
  * @param {number} [numProducts=1000] The number of products to load
  */
-export async function loadDataset(numProducts = 1000, variantions = [1, 2, 3, 4], tagsSettings) {
+export async function loadDataset() {
   console.log("########## loadDataset ##########");
   const products = [];
   // console.log("Load dataset called", Products);
@@ -463,15 +451,15 @@ export async function loadDataset(numProducts = 1000, variantions = [1, 2, 3, 4]
   let count = 0;
   const promiseArr = []
   const batchSize = 3;
-  console.log("Starting Tags, Orders")
-  await Promise.all([addTags(tagsSettings), addOrders(numProducts * 7)]);
+  console.log("Starting Tags, Orders");
+  await Promise.all([addTags(), addOrders()]);
   console.log("Finished Tags, Orders in", now() - s)
   s = now() 
   console.log("Started making products promise");
-  for (let x = 0; x < numProducts; x += 1) {
-    addProduct(batch, variantions)
+  for (let x = 0; x < settings.products; x += 1) {
+    addProduct(batch)
     if (x % 3000 === 0) {
-      console.log(workerId, "Indexting products", x);
+      console.log(workerId, "Indexting products", x, "of", settings.products);
       await batch.execute();
       batch = Products.initializeUnorderedBulkOp({useLegacyOps: true});
     }
