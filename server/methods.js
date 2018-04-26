@@ -199,7 +199,16 @@ function createProductImage(product) {
  */
 async function createProductImageFromUrl(product) {
   console.log("adding image to ", product.title);
-  const url = await randomPuppy();
+
+  // Get a random puppy image. They seem to occasionally be video files.
+  let url;
+  let isImage;
+  do {
+    url = await randomPuppy();
+    isImage = url.endsWith(".jpg") || url.endsWith(".png");
+    if (!isImage) console.log(`Got non-image file "${url}". Trying again.`);
+  } while (!isImage);
+
   const fileRecord = await FileRecord.fromUrl(url, { fetch });
   const { shopId } = product;
   const topVariant = getTopVariant(product._id);
