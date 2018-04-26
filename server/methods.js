@@ -175,7 +175,7 @@ async function createImage(storeName) {
   const r = Math.floor(Math.random() * 256);
   const g = Math.floor(Math.random() * 256);
   const b = Math.floor(Math.random() * 256);
-  if (caching) {
+  if (!caching) {
     if (storeName === "small") {
       return await sharp({
         create: {
@@ -318,7 +318,9 @@ async function addImage(options) {
         const ID = ObjectID()
         // console.log(copiesTemplate, storeName);
         const filesTemplate = _.cloneDeep(copiesTemplate[storeName].files);
-        const chunksTemplate = _.cloneDeep(copiesTemplate[storeName].chunks);
+        const chunksTemplate = {
+          n: "0"
+        }
         filesTemplate._id = ID;
         chunksTemplate.files_id = ID;
         // const imageData = await createImage(storeName);

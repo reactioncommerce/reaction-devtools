@@ -9,7 +9,7 @@ const tagSettings = {
     numOfTags: 250
 }
 /*
-41250 for mid -> 50 sec
+37500 for mid -> 50 sec
 124521 for ent
 
 60000 -> order, spread over a year
@@ -26,7 +26,7 @@ if (cluster.isMaster) {
         return resetData();
     })
     .then(() => {
-        for (var i = 0; i < 1; i++) {
+        for (var i = 0; i < numCPUs; i++) {
             cluster.fork();
         }
     });
@@ -46,11 +46,8 @@ async function start(id) {
     let numPro = 10;
     const variations = [1, 2, 5, 20];
     await init(id)
-    // console.log("Initialization done")
-    // // await methods.resetData();
-    // // console.log("Reset done")
-    // await loadDataset(numPro, variations, tagSettings);
-    // console.log(id, Date.now())
+    await loadDataset(numPro, variations, tagSettings);
+    console.log(id, Date.now())
 }
 // var Worker = require('webworker-threads').Worker;
  
