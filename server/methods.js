@@ -452,7 +452,7 @@ export async function loadDataset() {
   const promiseArr = []
   const batchSize = 3;
   console.log("Starting Tags, Orders");
-  await Promise.all([addTags(), addOrders()]);
+  await addTags();
   console.log("Finished Tags, Orders in", now() - s)
   s = now() 
   console.log("Started making products promise");
@@ -466,6 +466,7 @@ export async function loadDataset() {
   }
   await batch.execute();
   console.log("Time to index products =", now() - s);
+  await addOrders();
   // const products = Products.find({ type: "variant", ancestors: { $size: 2 } }, { _id: 1, ancestors: 1 });
   s = now();
   await addImage(options);
