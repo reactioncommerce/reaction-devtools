@@ -8,7 +8,7 @@ import randomID from "random-id";
 import { MongoClient, ObjectID, Binary } from 'mongodb';
 import { productTemplate, variantTemplate, optionTemplate, orderTemplate, filerecordTemplate, copiesTemplate, tagTemplate, metadata } from "./dataset";
 
-let Tags, Catalog, Products, ProductSearch, OrderSearch, Orders, Media, workerId = 0;;
+let Tags, Catalog, Products, ProductSearch, OrderSearch, Orders, Media, workerId = 0;
 let settings = {};
 const storeDbs = {};
 let stores = null;
@@ -97,7 +97,6 @@ export async function init(id, sett) {
   ProductSearch = db.collection("ProductSearch");
   OrderSearch = db.collection("OrderSearch");
   Orders = db.collection("Orders");
-  let Cart = db.collection("Cart");
   Media = db.collection("cfs.Media.filerecord");
   // await new Promise((resolve, reject) => {
   //   fs.readFile('/Users/akarshitwal/Documents/reaction-devtools/server/image.jpg', (err, d) => {
@@ -222,9 +221,9 @@ async function createImage(storeName) {
  * @summary Generate a random product with variants and options
  * @returns {array} products - An array of the products created
  */
-function addProduct(batch) {
-  const products = [];
+function addProduct(batch, catalogBatch) {
   const product = _.cloneDeep(productTemplate);
+  const variants = [];
   const productId = randomID(10, "aA0");
   product._id = productId;
   product.description = `${faker.lorem.paragraphs()}`;
@@ -244,6 +243,7 @@ function addProduct(batch) {
   variant.createdAt = new Date();
   variant.updatedAt = new Date();
   batch.insert(variant);
+  variants.push(variant);
   const numOptions = settings.variations[Math.floor(Math.random()*settings.variations.length)];
   const optionPrices = [];
   for (let x = 0; x < numOptions; x += 1) {
@@ -262,11 +262,8 @@ function addProduct(batch) {
       },
       parentId: product._id
     });
-    // for (var i = 0; i < IPS; i++) {
-    //   imagesPromise.push(createProductImage(option, product._id));
-    // }
     batch.insert(option);
-    // products.push({insertOne: option});
+    variants.push(option);
   }
   const priceMin = _.min(optionPrices);
   const priceMax = _.max(optionPrices);
@@ -282,6 +279,13 @@ function addProduct(batch) {
   };
   product.price = priceObject;
   batch.insert(product);
+
+  catalogBatch.insert({
+    ...product,
+    type: "product-simple",
+    variants,
+    media: []
+  })
 }
 
 function getTagsForProduct() {
@@ -296,6 +300,7 @@ function getTagsForProduct() {
 async function addImage(options) {
   // file._id = chunk.files_id = copies.store.key in string
   const storeBatch = {}
+  let catalogBatch = Catalog.initializeUnorderedBulkOp({useLegacyOps: true});
   Object.keys(storeDbs).forEach((key) => {
     storeBatch[key] = {
       files: storeDbs[key].files.initializeUnorderedBulkOp({ useLegacyOps: true }),
@@ -334,6 +339,26 @@ async function addImage(options) {
         filerecord.copies[storeName].name = name;
       }
       fileRecordBatch.insert(filerecord);
+      console.log(option.parentId);
+      catalogBatch.find({ _id: option.parentId }).updateOne({
+        $push: {
+          media: {
+            "metadata" : {
+              "productId" : option.parentId,
+              "variantId" : option.product._id,
+              "toGrid" : 1,
+              "shopId" : option.product.shopId,
+              "priority" : 0,
+              "workflow" : "published"
+            },
+            "thumbnail" : `/assets/files/Media/${filerecord._id}/thumbnail/${name}.jpg`,
+            "small" : `/assets/files/Media/${filerecord._id}/small/${name}.jpg`,
+            "medium" : `/assets/files/Media/${filerecord._id}/medium/${name}.jpg`,
+            "large" : `/assets/files/Media/${filerecord._id}/large/${name}.jpg`,
+            "image" : `/assets/files/Media/${filerecord._id}/image/${name}.jpg`
+          }
+        }
+      });
       if (count === 10000) {
         console.log(workerId, "Saving images", j, "of", options.length);
         const conversionsArr = []
@@ -341,13 +366,14 @@ async function addImage(options) {
           conversionsArr.push(storeBatch[key].files.execute());
           conversionsArr.push(storeBatch[key].chunks.execute());
         });
-        await Promise.all([fileRecordBatch.execute(), ...conversionsArr])
+        await Promise.all([ fileRecordBatch.execute(), ...conversionsArr, catalogBatch.execute() ]);
         count = 0;
         fileRecordBatch = Media.initializeUnorderedBulkOp({ useLegacyOps: true });
         Object.keys(storeBatch).forEach((key) => {
           storeBatch[key].files = storeDbs[key].files.initializeUnorderedBulkOp({ useLegacyOps: true });
           storeBatch[key].chunks = storeDbs[key].chunks.initializeUnorderedBulkOp({ useLegacyOps: true });
         });
+        catalogBatch = Catalog.initializeUnorderedBulkOp({useLegacyOps: true});
       }
     }
   }
@@ -356,7 +382,7 @@ async function addImage(options) {
     conversionsArr.push(storeBatch[key].files.execute());
     conversionsArr.push(storeBatch[key].chunks.execute());
   });
-  return Promise.all([fileRecordBatch.execute(), ...conversionsArr]);
+  return Promise.all([ fileRecordBatch.execute(), ...conversionsArr, catalogBatch.execute() ]);
 }
 
 async function addTags() {
@@ -445,7 +471,8 @@ export async function loadDataset() {
   console.log("########## loadDataset ##########");
   const products = [];
   // console.log("Load dataset called", Products);
-  var batch = Products.initializeUnorderedBulkOp({useLegacyOps: true});
+  let batch = Products.initializeUnorderedBulkOp({useLegacyOps: true});
+  let catalogBatch = Catalog.initializeUnorderedBulkOp({useLegacyOps: true});
   let s = now();
   let start = now();
   let count = 0;
@@ -457,14 +484,15 @@ export async function loadDataset() {
   s = now() 
   console.log("Started making products promise");
   for (let x = 0; x < settings.products; x += 1) {
-    addProduct(batch)
+    addProduct(batch, catalogBatch);
     if (x % 3000 === 0) {
       console.log(workerId, "Indexting products", x, "of", settings.products);
-      await batch.execute();
+      await Promise.all([batch.execute(), catalogBatch.execute()]);
       batch = Products.initializeUnorderedBulkOp({useLegacyOps: true});
+      catalogBatch = Catalog.initializeUnorderedBulkOp({useLegacyOps: true});
     }
   }
-  await batch.execute();
+  await Promise.all([batch.execute(), catalogBatch.execute()]);
   console.log("Time to index products =", now() - s);
   await addOrders();
   // const products = Products.find({ type: "variant", ancestors: { $size: 2 } }, { _id: 1, ancestors: 1 });
