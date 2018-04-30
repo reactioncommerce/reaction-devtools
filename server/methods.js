@@ -19,7 +19,7 @@ let mediaBatchLength = 0;
 let tags = [];
 const imagesPromise = [];
 const conversionPromises = [];
-const options = [];
+const optionsMap = {};
 let cachedImages = {};
 let binaryCachedImages = {};
 
@@ -246,6 +246,7 @@ function addProduct(batch, catalogBatch) {
   variants.push(variant);
   const numOptions = settings.variations[Math.floor(Math.random()*settings.variations.length)];
   const optionPrices = [];
+  optionsMap[productId] = [];
   for (let x = 0; x < numOptions; x += 1) {
     const option = _.cloneDeep(optionTemplate);
     const optionId = randomID(10, "aA0");
@@ -254,13 +255,10 @@ function addProduct(batch, catalogBatch) {
     option.price = faker.commerce.price();
     optionPrices.push(parseFloat(option.price));
     option.ancestors = [productId, variantId];
-    options.push({
-      product: {
-        _id: optionId,
-        type: option.type,
-        shopId: option.shopId
-      },
-      parentId: product._id
+    optionsMap[productId].push({
+      _id: optionId,
+      type: option.type,
+      shopId: option.shopId
     });
     batch.insert(option);
     variants.push(option);
@@ -297,7 +295,7 @@ function getTagsForProduct() {
   return hashtags;
 }
 
-async function addImage(options) {
+async function addImage() {
   // file._id = chunk.files_id = copies.store.key in string
   const storeBatch = {}
   let catalogBatch = Catalog.initializeUnorderedBulkOp({useLegacyOps: true});
@@ -309,72 +307,73 @@ async function addImage(options) {
   });
   let fileRecordBatch = Media.initializeUnorderedBulkOp({ useLegacyOps: true });
   let count = 0;
-  for (let j = 0; j < options.length; j++) {
-    const option = options[j];
-    for (let i = 0; i < settings.IPS; i++) {
-      count++;
-      const name = `${randomID(10, "aA0")}.jpg`;
-      const filerecord = _.cloneDeep(filerecordTemplate);
-      filerecord._id = randomID(10, "aA0");
-      filerecord.original.name = name;
-      filerecord.metadata.productId = option.parentId;
-      filerecord.metadata.variantId = option.product._id;
-      filerecord.metadata.shopId = option.product.shopId;
-      for (const store of stores) {
-        const storeName = store.name;
-        const ID = ObjectID();
-        // console.log(copiesTemplate, storeName);
-        const filesTemplate = _.cloneDeep(copiesTemplate[storeName].files);
-        const chunksTemplate = {
-          n: 0
-        }
-        filesTemplate._id = ID;
-        chunksTemplate.files_id = ID;
-        // const imageData = await createImage(storeName);
-        // chunksTemplate.data = Binary(imageData);
-        chunksTemplate.data = binaryCachedImages[storeName];
-        storeBatch[storeName].files.insert(filesTemplate);
-        storeBatch[storeName].chunks.insert(chunksTemplate);
-        filerecord.copies[storeName].key = ID.toString();
-        filerecord.copies[storeName].name = name;
-      }
-      fileRecordBatch.insert(filerecord);
-      console.log(option.parentId);
-      catalogBatch.find({ _id: option.parentId }).updateOne({
-        $push: {
-          media: {
-            "metadata" : {
-              "productId" : option.parentId,
-              "variantId" : option.product._id,
-              "toGrid" : 1,
-              "shopId" : option.product.shopId,
-              "priority" : 0,
-              "workflow" : "published"
-            },
-            "thumbnail" : `/assets/files/Media/${filerecord._id}/thumbnail/${name}.jpg`,
-            "small" : `/assets/files/Media/${filerecord._id}/small/${name}.jpg`,
-            "medium" : `/assets/files/Media/${filerecord._id}/medium/${name}.jpg`,
-            "large" : `/assets/files/Media/${filerecord._id}/large/${name}.jpg`,
-            "image" : `/assets/files/Media/${filerecord._id}/image/${name}.jpg`
+  const products = Object.keys(optionsMap);
+  for (let k = 0; k < products.length; k++) {
+    const options = optionsMap[products[k]];
+    const mediaArr = [];
+    for (let j = 0; j < options.length; j++) {
+      const option = options[j];
+      for (let i = 0; i < settings.IPS; i++) {
+        count++;
+        const name = `${randomID(10, "aA0")}.jpg`;
+        const filerecord = _.cloneDeep(filerecordTemplate);
+        filerecord._id = randomID(10, "aA0");
+        filerecord.original.name = name;
+        filerecord.metadata.productId = products[k];
+        filerecord.metadata.variantId = option._id;
+        filerecord.metadata.shopId = option.shopId;
+        for (const store of stores) {
+          const storeName = store.name;
+          const ID = ObjectID();
+          // console.log(copiesTemplate, storeName);
+          const filesTemplate = _.cloneDeep(copiesTemplate[storeName].files);
+          const chunksTemplate = {
+            n: 0
           }
+          filesTemplate._id = ID;
+          chunksTemplate.files_id = ID;
+          // const imageData = await createImage(storeName);
+          // chunksTemplate.data = Binary(imageData);
+          chunksTemplate.data = binaryCachedImages[storeName];
+          storeBatch[storeName].files.insert(filesTemplate);
+          storeBatch[storeName].chunks.insert(chunksTemplate);
+          filerecord.copies[storeName].key = ID.toString();
+          filerecord.copies[storeName].name = name;
         }
-      });
-      if (count === 6000) {
-        console.log(workerId, "Saving images", j, "of", options.length);
-        const conversionsArr = []
-        Object.keys(storeBatch).forEach((key) => {
-          conversionsArr.push(storeBatch[key].files.execute());
-          conversionsArr.push(storeBatch[key].chunks.execute());
+        fileRecordBatch.insert(filerecord);
+        mediaArr.push({
+          "metadata" : {
+            "productId" : products[k],
+            "variantId" : option._id,
+            "toGrid" : 1,
+            "shopId" : option.shopId,
+            "priority" : 0,
+            "workflow" : "published"
+          },
+          "thumbnail" : `/assets/files/Media/${filerecord._id}/thumbnail/${name}.jpg`,
+          "small" : `/assets/files/Media/${filerecord._id}/small/${name}.jpg`,
+          "medium" : `/assets/files/Media/${filerecord._id}/medium/${name}.jpg`,
+          "large" : `/assets/files/Media/${filerecord._id}/large/${name}.jpg`,
+          "image" : `/assets/files/Media/${filerecord._id}/image/${name}.jpg`
         });
-        await Promise.all([ fileRecordBatch.execute(), ...conversionsArr, catalogBatch.execute() ]);
-        count = 0;
-        fileRecordBatch = Media.initializeUnorderedBulkOp({ useLegacyOps: true });
-        Object.keys(storeBatch).forEach((key) => {
-          storeBatch[key].files = storeDbs[key].files.initializeUnorderedBulkOp({ useLegacyOps: true });
-          storeBatch[key].chunks = storeDbs[key].chunks.initializeUnorderedBulkOp({ useLegacyOps: true });
-        });
-        catalogBatch = Catalog.initializeUnorderedBulkOp({useLegacyOps: true});
       }
+    }
+    catalogBatch.find({ _id: products[k] }).updateOne({ $set: { media: mediaArr } });
+    if (count >= 6000) {
+      console.log(workerId, "Saving images", k, "of", products.length);
+      const conversionsArr = []
+      Object.keys(storeBatch).forEach((key) => {
+        conversionsArr.push(storeBatch[key].files.execute());
+        conversionsArr.push(storeBatch[key].chunks.execute());
+      });
+      await Promise.all([ fileRecordBatch.execute(), ...conversionsArr, catalogBatch.execute() ]);
+      count = 0;
+      fileRecordBatch = Media.initializeUnorderedBulkOp({ useLegacyOps: true });
+      Object.keys(storeBatch).forEach((key) => {
+        storeBatch[key].files = storeDbs[key].files.initializeUnorderedBulkOp({ useLegacyOps: true });
+        storeBatch[key].chunks = storeDbs[key].chunks.initializeUnorderedBulkOp({ useLegacyOps: true });
+      });
+      catalogBatch = Catalog.initializeUnorderedBulkOp({useLegacyOps: true});
     }
   }
   const conversionsArr = []
@@ -497,19 +496,8 @@ export async function loadDataset() {
   await addOrders();
   // const products = Products.find({ type: "variant", ancestors: { $size: 2 } }, { _id: 1, ancestors: 1 });
   s = now();
-  await addImage(options);
-  // for (const product of options) {
-  //   for (var i = 0; i < IPS; i++) {
-  //       imagesPromise.push(createProductImage(product.product, product.parentId));
-  //   }
-  // }
-  // await Promise.all(imagesPromise)
+  await addImage();
   console.log("Time to index images =", now() - s);
-  // s = now();
-  // console.log("Going to index conversions");
-  // mediaBatch.execute();
-  // // await Promise.all(conversionPromises);
-  // console.log("Time to index conversions =", now() - s);
   console.log("****************** Total time = ", now() - start, "*********************")
 }
 
