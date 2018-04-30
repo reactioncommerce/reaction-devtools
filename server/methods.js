@@ -359,7 +359,7 @@ async function addImage(options) {
           }
         }
       });
-      if (count === 10000) {
+      if (count === 6000) {
         console.log(workerId, "Saving images", j, "of", options.length);
         const conversionsArr = []
         Object.keys(storeBatch).forEach((key) => {
@@ -485,7 +485,7 @@ export async function loadDataset() {
   console.log("Started making products promise");
   for (let x = 0; x < settings.products; x += 1) {
     addProduct(batch, catalogBatch);
-    if (x % 3000 === 0) {
+    if (x % 2000 === 0) {
       console.log(workerId, "Indexting products", x, "of", settings.products);
       await Promise.all([batch.execute(), catalogBatch.execute()]);
       batch = Products.initializeUnorderedBulkOp({useLegacyOps: true});
