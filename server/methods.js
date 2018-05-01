@@ -469,7 +469,7 @@ async function addOrders() {
 export async function loadDataset() {
   console.log("########## loadDataset ##########");
   const products = [];
-  // console.log("Load dataset called", Products);
+  console.log("Setting of this process", settings);
   let batch = Products.initializeUnorderedBulkOp({useLegacyOps: true});
   let catalogBatch = Catalog.initializeUnorderedBulkOp({useLegacyOps: true});
   let s = now();
@@ -482,7 +482,7 @@ export async function loadDataset() {
   console.log("Finished Tags, Orders in", now() - s)
   s = now() 
   console.log("Started making products promise");
-  for (let x = 0; x < settings.products; x += 1) {
+  for (let x = 1; x <= settings.products; x += 1) {
     addProduct(batch, catalogBatch);
     if (x % 2000 === 0) {
       console.log(workerId, "Indexting products", x, "of", settings.products);
@@ -496,6 +496,7 @@ export async function loadDataset() {
   await addOrders();
   // const products = Products.find({ type: "variant", ancestors: { $size: 2 } }, { _id: 1, ancestors: 1 });
   s = now();
+  console.log("Adding images");
   await addImage();
   console.log("Time to index images =", now() - s);
   console.log("****************** Total time = ", now() - start, "*********************")
