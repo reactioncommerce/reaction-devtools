@@ -7,7 +7,7 @@ To start with dev data
 5. `Ctrl + a` (detach from screen)
 6. The app will be available at <SERVER_IP>:4000
 
-To start with mid-enterprise data
+To start with Mid-enterprise data
 1. ssh into the system
 2. `cd reaction`
 3. `screen -S mid`
@@ -15,7 +15,7 @@ To start with mid-enterprise data
 5. `Ctrl + a` (detach from screen)
 6. The app will be available at <SERVER_IP>:3000
 
-To start with retailer data
+To start with Mid retailer data
 1. ssh into the system
 2. `cd reaction`
 3. `screen -S retailer`
