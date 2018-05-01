@@ -257,7 +257,6 @@ function addProduct(batch, catalogBatch) {
     option.ancestors = [productId, variantId];
     optionsMap[productId].push({
       _id: optionId,
-      type: option.type,
       shopId: option.shopId
     });
     batch.insert(option);
