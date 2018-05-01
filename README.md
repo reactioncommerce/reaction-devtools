@@ -26,9 +26,11 @@ To start with retailer data
 
 ## Tips
 1. To be able to signin(or atleast see the option for it), you might need to zoom out on your browser.
-2. Right now when you scroll to the bottom, more products are not loaded. I guess this is a problem with reaction itself since we get the error ```
+2. Right now when you scroll to the bottom, more products are not loaded. I guess this is a problem with reaction itself since we get the error
+```
 loadProducts is not a function
     at ProductGrid._this.loadMoreProducts (app.js:55305)
 ``` 
 in the console
+
 3. If something stops loading at all, try a refresh without cache(Cmd + Shift + R).
