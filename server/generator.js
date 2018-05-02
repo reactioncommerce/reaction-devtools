@@ -62,7 +62,7 @@ settings.tags = Math.round(settings.tags / numCPUs);
 
 if (cluster.isMaster) {
     //   Fork workers.
-    init(settings).then(() => {
+    init(0, settings).then(() => {
         return resetData();
     })
     .then(() => {
