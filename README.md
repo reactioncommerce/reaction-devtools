@@ -1,9 +1,14 @@
-# Load data
+# Data Setup
 1. ssh into the system
 2. `cd reaction-devtools`
 3. Edit server/generator.js's line `const settings = _.clone(dev);`
 4. Replace `dev` with the type of data to be loaded, options are `dev`, `ret`, `mid`, `ent`.
 5. Run `npx babel-node server/generator.js --max_old_space_size=8192 --presets es2015,stage-2`
+
+# Starting mongo
+1. The mongod server is automatically started on server start.
+1. To stop the server use `sudo service mongod stop`
+1. To start again use `sudo service mongod start`
 
 # Reaction server setup
 1. ssh into the system
@@ -43,6 +48,13 @@ To start with retailer data
 1. `MONGO_URL=mongodb://172.31.18.209:27017/ret ROOT_URL=http://localhost.com PORT=4000 node --max_old_space_size=8192 main.js`
 1. `Ctrl + a` (detach from screen)
 1. The app will be available at <SERVER_IP>:4000
+
+# Stopping Reaction
+1. ssh into the system
+1. List screens running `screen -ls`
+2. Attach the screen `screen -r mid` or `screen -r ret`
+3. Stop reactoin `Ctrl + C`
+4. Exit from the screen `exit`
 
 ## Tips
 1. To be able to signin(or atleast see the option for it), you might need to zoom out on your browser.
