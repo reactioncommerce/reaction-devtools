@@ -17,17 +17,16 @@
 1. `. ~/.bashrc`
 1. `n 8.9.4`
 1. `git clone https://github.com/reactioncommerce/reaction.git`
-1. `mkdir reaction`
 1. `mkdir build`
 1. `cd reaction`
 1. `sudo yum groupinstall "Development Tools" -y`
 1. `curl https://install.meteor.com/ | sh`
 1. `npm install -g reaction-cli`
 1. `. ~/.bashrc`
+1. `meteor npm install --save bcrypt`
 1. `meteor npm install`
-1. `meteor build ../build`
+1. `meteor build --directory ../build`
 1. `cd ../build`
-1. `tar xvzf reaction.tar.gz`
 1. `cd bundle/programs/server/`
 1. `npm install`
 1. Then execute the steps from below for the data that you want to run.
