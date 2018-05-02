@@ -5,37 +5,12 @@
 4. Replace `dev` with the type of data to be loaded, options are `dev`, `ret`, `mid`, `ent`.
 5. Run `npx babel-node server/generator.js --max_old_space_size=8192 --presets es2015,stage-2`
 
-# Starting Reaction
-To start with dev data
-1. ssh into the system
-2. `cd reaction`
-3. `screen -S dev`
-4. `reaction --port 4000`
-5. `Ctrl + a` (detach from screen)
-6. The app will be available at <SERVER_IP>:4000
-
-To start with mid-enterprise data
-1. ssh into the system
-2. `cd reaction`
-3. `screen -S mid`
-4. `MONGO_URL=mongodb://<MONGO_SERVER_PRIVATE_IP>:27017/mid reaction --port 5000`
-5. `Ctrl + a` (detach from screen)
-6. The app will be available at <SERVER_IP>:5000
-
-To start with retailer data
-1. ssh into the system
-2. `cd reaction`
-3. `screen -S ret`
-4. `MONGO_URL=mongodb://172.31.18.209:27017/ret reaction --port 4000`
-5. `Ctrl + a` (detach from screen)
-6. The app will be available at <SERVER_IP>:4000
-
 # Reaction server setup
 1. ssh into the system
 1. `sudo yum install -y git`
 1. `curl -L https://git.io/n-install | bash`
 1. `. ~/.bashrc`
-1. `n lts`
+1. `n 8.9.4`
 1. `git clone https://github.com/reactioncommerce/reaction.git`
 1. `mkdir reaction`
 1. `mkdir build`
@@ -50,10 +25,24 @@ To start with retailer data
 1. `tar xvzf reaction.tar.gz`
 1. `cd bundle/programs/server/`
 1. `npm install`
-1. `cd ~/build/bundle`
+1. Then execute the steps from below for the data that you want to run.
+
+# Starting Reaction
+To start with mid-enterprise data
+1. ssh into the system
+1. `screen -S mid`
+1. `cd build/bundle/`
+1. `MONGO_URL=mongodb://172.31.18.209:27017/mid ROOT_URL=http://localhost.com PORT=5000 node --max_old_space_size=8192 main.js`
+1. `Ctrl + a` (detach from screen)
+1. The app will be available at <SERVER_IP>:5000
+
+To start with retailer data
+1. ssh into the system
+1. `screen -S ret`
+1. `cd build/bundle/`
 1. `MONGO_URL=mongodb://172.31.18.209:27017/ret ROOT_URL=http://localhost.com PORT=4000 node --max_old_space_size=8192 main.js`
-
-
+1. `Ctrl + a` (detach from screen)
+1. The app will be available at <SERVER_IP>:4000
 
 ## Tips
 1. To be able to signin(or atleast see the option for it), you might need to zoom out on your browser.
