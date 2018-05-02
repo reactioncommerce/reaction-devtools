@@ -33,7 +33,7 @@
 1. Then execute the steps from below for the data that you want to run.
 
 # Starting Reaction
-To start with mid-enterprise data
+To start with Mid-erprise Retailer data
 1. ssh into the system
 1. `screen -S mid`
 1. `cd build/bundle/`
@@ -41,7 +41,7 @@ To start with mid-enterprise data
 1. `Ctrl + a` (detach from screen)
 1. The app will be available at <SERVER_IP>:5000
 
-To start with retailer data
+To start with Mid Retailer data
 1. ssh into the system
 1. `screen -S ret`
 1. `cd build/bundle/`
