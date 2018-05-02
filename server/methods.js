@@ -160,39 +160,39 @@ function getPrimaryProduct(variant) {
  * @param {number} quality - quality of the image
  * @param {function} callback - callback
  */
-async function createImage(storeName) {
-  const caching = true;
-  console.log("Store name is ", storeName);
+async function createImage(storeName, caching = true) {
+  if (caching) {
+    return binaryCachedImages[storeName];
+  }
   const r = Math.floor(Math.random() * 256);
   const g = Math.floor(Math.random() * 256);
   const b = Math.floor(Math.random() * 256);
-  if (caching) {
-    if (storeName === "small") {
-      return await sharp({
-        create: {
-            width: 235,
-            height: 235,
-            channels: 3,
-            background: { r, g, b }
-        }
-        })
-        .png()
-        .toBuffer();
-    }
-    if (storeName === "thumbnail") {
-      await sharp({
-        create: {
-            width: 100,
-            height: 100,
-            channels: 3,
-            background: { r, g, b }
-        }
-        })
-        .png()
-        .toBuffer();
-      
-    }
-    return await sharp({
+  let img;
+  if (storeName === "small") {
+    img = await sharp({
+      create: {
+          width: 235,
+          height: 235,
+          channels: 3,
+          background: { r, g, b }
+      }
+      })
+      .png()
+      .toBuffer();
+  } else if (storeName === "thumbnail") {
+    img = await sharp({
+      create: {
+          width: 100,
+          height: 100,
+          channels: 3,
+          background: { r, g, b }
+      }
+      })
+      .png()
+      .toBuffer();
+    
+  } else {
+    img = await sharp({
       create: {
           width: 600,
           height: 600,
@@ -203,7 +203,7 @@ async function createImage(storeName) {
       .jpeg()
       .toBuffer();
   }
-  return cachedImages[storeName];
+  return Binary(img);
 }
 
 /**
@@ -242,6 +242,7 @@ function addProduct(batch, catalogBatch) {
     const optionId = randomID(10, "aA0");
     option._id = optionId;
     option.optionTitle = faker.commerce.productName();
+    option.title = option.optionTitle;
     option.price = faker.commerce.price();
     optionPrices.push(parseFloat(option.price));
     option.ancestors = [productId, variantId];
@@ -284,6 +285,47 @@ function getTagsForProduct() {
   return hashtags;
 }
 
+async function addPrimaryImage(productId, shopId, fileRecordBatch, mediaArr, storeBatch) {
+  const name = `${randomID(10, "aA0")}.jpg`;
+  const filerecord = _.cloneDeep(filerecordTemplate);
+  filerecord._id = randomID(10, "aA0");
+  filerecord.original.name = name;
+  filerecord.metadata.productId = productId;
+  filerecord.metadata.variantId = productId;
+  filerecord.metadata.shopId = shopId;
+  for (const store of stores) {
+    const storeName = store.name;
+    const ID = ObjectID();
+    const filesTemplate = _.cloneDeep(copiesTemplate[storeName].files);
+    const chunksTemplate = {
+      n: 0
+    }
+    filesTemplate._id = ID;
+    chunksTemplate.files_id = ID;
+    chunksTemplate.data = await createImage(storeName, settings.primaryImageCached);
+    storeBatch[storeName].files.insert(filesTemplate);
+    storeBatch[storeName].chunks.insert(chunksTemplate);
+    filerecord.copies[storeName].key = ID.toString();
+    filerecord.copies[storeName].name = name;
+  }
+  fileRecordBatch.insert(filerecord);
+  mediaArr.push({
+    "metadata" : {
+      "productId" : productId,
+      "variantId" : productId,
+      "toGrid" : 1,
+      "shopId" : shopId,
+      "priority" : 0,
+      "workflow" : "published"
+    },
+    "thumbnail" : `/assets/files/Media/${filerecord._id}/thumbnail/${name}`,
+    "small" : `/assets/files/Media/${filerecord._id}/small/${name}`,
+    "medium" : `/assets/files/Media/${filerecord._id}/medium/${name}`,
+    "large" : `/assets/files/Media/${filerecord._id}/large/${name}`,
+    "image" : `/assets/files/Media/${filerecord._id}/image/${name}`
+  });
+}
+
 async function addImage() {
   // file._id = chunk.files_id = copies.store.key in string
   const storeBatch = {}
@@ -300,6 +342,7 @@ async function addImage() {
   for (let k = 0; k < products.length; k++) {
     const options = optionsMap[products[k]];
     const mediaArr = [];
+    await addPrimaryImage(products[k], options[0].shopId, fileRecordBatch, mediaArr, storeBatch);
     for (let j = 0; j < options.length; j++) {
       const option = options[j];
       for (let i = 0; i < settings.IPS; i++) {
@@ -322,7 +365,7 @@ async function addImage() {
           chunksTemplate.files_id = ID;
           // const imageData = await createImage(storeName);
           // chunksTemplate.data = Binary(imageData);
-          chunksTemplate.data = binaryCachedImages[storeName];
+          chunksTemplate.data = createImage(storeName, settings.optionsImageCached);
           storeBatch[storeName].files.insert(filesTemplate);
           storeBatch[storeName].chunks.insert(chunksTemplate);
           filerecord.copies[storeName].key = ID.toString();

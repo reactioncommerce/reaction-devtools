@@ -55,7 +55,6 @@ export const variantTemplate = {
 export const optionTemplate = {
   ancestors: [],
   type: "variant",
-  title: "One pound bag",
   price: 12,
   isVisible: true,
   isDeleted: false,

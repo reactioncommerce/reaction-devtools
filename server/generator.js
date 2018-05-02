@@ -16,7 +16,9 @@ const dev = {
     attributes: 10,
     duration: 1,
     productBatchSize: 3000,
-    imageBatchSize: 5000
+    imageBatchSize: 5000,
+    optionsImageCached: false,
+    primaryImageCached: false
 }
 const ret = {
     dbName: "ret",
@@ -28,7 +30,9 @@ const ret = {
     attributes: 20,
     duration: 3,
     productBatchSize: 2500,
-    imageBatchSize: 5000
+    imageBatchSize: 5000,
+    optionsImageCached: false,
+    primaryImageCached: false
 }
 const mid = {
     dbName: "mid",
@@ -40,7 +44,9 @@ const mid = {
     attributes: 20,
     duration: 3,
     productBatchSize: 2000,
-    imageBatchSize: 5000
+    imageBatchSize: 5000,
+    optionsImageCached: true,
+    primaryImageCached: false
 }
 const ent = {
     dbName: "ent",
@@ -52,7 +58,9 @@ const ent = {
     attributes: 40,
     duration: 3,
     productBatchSize: 1000,
-    imageBatchSize: 5000
+    imageBatchSize: 5000,
+    optionsImageCached: true,
+    primaryImageCached: true
 }
 
 const settings = _.clone(dev);
