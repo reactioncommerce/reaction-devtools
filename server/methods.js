@@ -67,12 +67,10 @@ async function cacheImages() {
 }
 
 export async function init(id, sett) {
-  // console.log("********** init ***********");
   workerId = id;
-  const url = 'mongodb://localhost:3001/';
-  const dbName = 'meteor';
+  const url = 'mongodb://localhost:27017/';
   const client = await MongoClient.connect(url);
-  db = client.db(dbName);
+  db = client.db(sett.dbName);
   settings = sett;
   stores = [
     {
@@ -98,14 +96,6 @@ export async function init(id, sett) {
   OrderSearch = db.collection("OrderSearch");
   Orders = db.collection("Orders");
   Media = db.collection("cfs.Media.filerecord");
-  // await new Promise((resolve, reject) => {
-  //   fs.readFile('/Users/akarshitwal/Documents/reaction-devtools/server/image.jpg', (err, d) => {
-  //     // Encode to base64
-  //     var encodedImage = new Buffer(d, 'binary').toString('base64');
-  //     data = encodedImage;
-  //     resolve(encodedImage);
-  //   });
-  // });
   for (const store of stores) {
     storeDbs[store.name] = {
       files: db.collection(`cfs_gridfs.${store.name}.files`),
@@ -233,7 +223,7 @@ function addProduct(batch, catalogBatch) {
   product.hashtags = getTagsForProduct();
   product.createdAt = new Date();
   product.updatedAt = new Date();
-  product.metadata = metadata[settings.attributes];
+  product.metafields = metadata[settings.attributes];
   // always one top level variant
   const variant = _.cloneDeep(variantTemplate);
   const variantId = randomID(10, "aA0");;
@@ -324,7 +314,6 @@ async function addImage() {
         for (const store of stores) {
           const storeName = store.name;
           const ID = ObjectID();
-          // console.log(copiesTemplate, storeName);
           const filesTemplate = _.cloneDeep(copiesTemplate[storeName].files);
           const chunksTemplate = {
             n: 0
@@ -349,16 +338,16 @@ async function addImage() {
             "priority" : 0,
             "workflow" : "published"
           },
-          "thumbnail" : `/assets/files/Media/${filerecord._id}/thumbnail/${name}.jpg`,
-          "small" : `/assets/files/Media/${filerecord._id}/small/${name}.jpg`,
-          "medium" : `/assets/files/Media/${filerecord._id}/medium/${name}.jpg`,
-          "large" : `/assets/files/Media/${filerecord._id}/large/${name}.jpg`,
-          "image" : `/assets/files/Media/${filerecord._id}/image/${name}.jpg`
+          "thumbnail" : `/assets/files/Media/${filerecord._id}/thumbnail/${name}`,
+          "small" : `/assets/files/Media/${filerecord._id}/small/${name}`,
+          "medium" : `/assets/files/Media/${filerecord._id}/medium/${name}`,
+          "large" : `/assets/files/Media/${filerecord._id}/large/${name}`,
+          "image" : `/assets/files/Media/${filerecord._id}/image/${name}`
         });
       }
     }
     catalogBatch.find({ _id: products[k] }).updateOne({ $set: { media: mediaArr } });
-    if (count >= 6000) {
+    if (count >= settings.imageBatchSize) {
       console.log(workerId, "Saving images", k, "of", products.length);
       const conversionsArr = []
       Object.keys(storeBatch).forEach((key) => {
@@ -483,7 +472,7 @@ export async function loadDataset() {
   console.log("Started making products promise");
   for (let x = 1; x <= settings.products; x += 1) {
     addProduct(batch, catalogBatch);
-    if (x % 2000 === 0) {
+    if (x % settings.productBatchSize === 0) {
       console.log(workerId, "Indexting products", x, "of", settings.products);
       await Promise.all([batch.execute(), catalogBatch.execute()]);
       batch = Products.initializeUnorderedBulkOp({useLegacyOps: true});
