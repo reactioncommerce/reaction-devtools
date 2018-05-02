@@ -35,7 +35,7 @@ To start with retailer data
 1. `sudo yum install -y git`
 1. `curl -L https://git.io/n-install | bash`
 1. `. ~/.bashrc`
-1. `n 9.2.1`
+1. `n lts`
 1. `git clone https://github.com/reactioncommerce/reaction.git`
 1. `mkdir reaction`
 1. `mkdir build`
@@ -43,18 +43,15 @@ To start with retailer data
 1. `sudo yum groupinstall "Development Tools" -y`
 1. `curl https://install.meteor.com/ | sh`
 1. `npm install -g reaction-cli`
-1. `echo export NODE_OPTIONS="--max-old-space-size=8192" >> ~/.bashrc`
-1. `echo export TOOL_NODE_FLAGS="--max_old_space_size=8192" >> ~/.bashrc`
 1. `. ~/.bashrc`
 1. `meteor npm install`
-1. `meteor build ../build --architecture os.linux.x86_64`
+1. `meteor build ../build`
 1. `cd ../build`
 1. `tar xvzf reaction.tar.gz`
 1. `cd bundle/programs/server/`
 1. `npm install`
 1. `cd ~/build/bundle`
 1. `MONGO_URL=mongodb://172.31.18.209:27017/ret ROOT_URL=http://localhost.com PORT=4000 node --max_old_space_size=8192 main.js`
-1. See segmentation fault.
 
 
 
