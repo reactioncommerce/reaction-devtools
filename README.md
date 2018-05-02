@@ -38,6 +38,7 @@ To start with retailer data
 1. `n 9.2.1`
 1. `git clone https://github.com/reactioncommerce/reaction.git`
 1. `mkdir reaction`
+1. `mkdir build`
 1. `cd reaction`
 1. `sudo yum groupinstall "Development Tools" -y`
 1. `curl https://install.meteor.com/ | sh`
