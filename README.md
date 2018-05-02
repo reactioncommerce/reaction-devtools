@@ -37,7 +37,7 @@ To start with mid-enterprise data
 1. ssh into the system
 1. `screen -S mid`
 1. `cd build/bundle/`
-1. `MONGO_URL=mongodb://172.31.18.209:27017/mid ROOT_URL=http://localhost.com PORT=5000 node --max_old_space_size=8192 main.js`
+1. `MONGO_URL=mongodb://172.31.18.209:27017/meteor ROOT_URL=http://localhost.com PORT=5000 node --max_old_space_size=8192 main.js`
 1. `Ctrl + a` (detach from screen)
 1. The app will be available at <SERVER_IP>:5000
 
