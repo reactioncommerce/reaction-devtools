@@ -76,7 +76,7 @@ if (cluster.isMaster) {
         console.log(`worker ${worker.process.pid} died`);
     });
 } else {
-    start(cluster.worker.id)
+    start(cluster.worker.id, settings)
     console.log(cluster.worker.id, Date.now())
     // start(cluster.worker.id)
 }
