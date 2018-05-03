@@ -1,0 +1,4 @@
+#!/bin/bash
+
+MONGO_URL=mongodb://172.31.18.209:27017/ret ROOT_URL=http://localhost.com PORT=4000 node --max_old_space_size=8192 /home/ec2-user/build/bundle/main.js > ret.log 2> ret_errors.log
+
