@@ -71,6 +71,7 @@ const settings = _.clone(dev);
 settings.products = Math.round(settings.products / numCPUs);
 settings.orders = Math.round(settings.orders / numCPUs);
 settings.tags = Math.round(settings.tags / numCPUs);
+settings.discounts = Math.round(settings.discounts / numCPUs);
 
 if (cluster.isMaster) {
     //   Fork workers.
