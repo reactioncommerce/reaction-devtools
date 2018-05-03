@@ -532,7 +532,10 @@ export async function loadDataset() {
       catalogBatch = Catalog.initializeUnorderedBulkOp({useLegacyOps: true});
     }
   }
-  await Promise.all([batch.execute(), catalogBatch.execute()]);
+  try {
+    await Promise.all([batch.execute(), catalogBatch.execute()]);
+  } catch (err) {
+  }
   console.log("Time to index products =", now() - s);
   await addOrders();
   // const products = Products.find({ type: "variant", ancestors: { $size: 2 } }, { _id: 1, ancestors: 1 });
