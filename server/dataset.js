@@ -387,7 +387,6 @@ export const tagTemplate = {
 
 export const discountTemplate = {
   "code" : "Coupon",
-  "discount" : "0.1%",
   "conditions" : {
       "accountLimit" : 100,
       "redemptionLimit" : 100,

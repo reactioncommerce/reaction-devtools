@@ -482,7 +482,7 @@ function addDiscounts() {
     const discount = _.cloneDeep(discountTemplate);
     discount._id = randomID(20, "aA0");
     discount.code = `${discount.code}-${i}`;
-    discount.discount = `${(100.0 / settings.discounts) * (i + 1)}%`
+    discount.discount = (100.0 / settings.discounts) * (i + 1)
     discountBatch.insert(discount);
   }
   return discountBatch.execute();
@@ -556,6 +556,7 @@ export async function resetData() {
   await Tags.remove({});
   await Products.remove({});
   await Catalog.remove({});
+  await Discounts.remove({});
   await ProductSearch.remove({});
   await OrderSearch.remove({});
   await Orders.remove({});
