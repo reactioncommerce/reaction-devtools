@@ -6,9 +6,9 @@ import slugify from "slugify";
 var fs = require("fs");
 import randomID from "random-id";
 import { MongoClient, ObjectID, Binary } from 'mongodb';
-import { productTemplate, variantTemplate, optionTemplate, orderTemplate, filerecordTemplate, copiesTemplate, tagTemplate, metadata } from "./dataset";
+import { productTemplate, variantTemplate, optionTemplate, orderTemplate, filerecordTemplate, copiesTemplate, tagTemplate, metadata, discountTemplate } from "./dataset";
 
-let Tags, Catalog, Products, ProductSearch, OrderSearch, Orders, Media, workerId = 0;
+let Tags, Catalog, Products, ProductSearch, OrderSearch, Orders, Media, Discounts, workerId = 0;
 let settings = {};
 const storeDbs = {};
 let stores = null;
@@ -95,6 +95,7 @@ export async function init(id, sett) {
   ProductSearch = db.collection("ProductSearch");
   OrderSearch = db.collection("OrderSearch");
   Orders = db.collection("Orders");
+  Discounts = db.collection("Discounts");
   Media = db.collection("cfs.Media.filerecord");
   for (const store of stores) {
     storeDbs[store.name] = {
@@ -247,8 +248,7 @@ function addProduct(batch, catalogBatch) {
     optionPrices.push(parseFloat(option.price));
     option.ancestors = [productId, variantId];
     optionsMap[productId].push({
-      _id: optionId,
-      shopId: option.shopId
+      _id: optionId
     });
     batch.insert(option);
     variants.push(option);
@@ -285,14 +285,13 @@ function getTagsForProduct() {
   return hashtags;
 }
 
-async function addPrimaryImage(productId, shopId, fileRecordBatch, mediaArr, storeBatch) {
+async function addPrimaryImage(productId, fileRecordBatch, mediaArr, storeBatch) {
   const name = `${randomID(10, "aA0")}.jpg`;
   const filerecord = _.cloneDeep(filerecordTemplate);
   filerecord._id = randomID(10, "aA0");
   filerecord.original.name = name;
   filerecord.metadata.productId = productId;
   filerecord.metadata.variantId = productId;
-  filerecord.metadata.shopId = shopId;
   for (const store of stores) {
     const storeName = store.name;
     const ID = ObjectID();
@@ -314,7 +313,7 @@ async function addPrimaryImage(productId, shopId, fileRecordBatch, mediaArr, sto
       "productId" : productId,
       "variantId" : productId,
       "toGrid" : 1,
-      "shopId" : shopId,
+      "shopId" : "J8Bhq3uTtdgwZx3rz",
       "priority" : 0,
       "workflow" : "published"
     },
@@ -342,7 +341,7 @@ async function addImage() {
   for (let k = 0; k < products.length; k++) {
     const options = optionsMap[products[k]];
     const mediaArr = [];
-    await addPrimaryImage(products[k], options[0].shopId, fileRecordBatch, mediaArr, storeBatch);
+    await addPrimaryImage(products[k], fileRecordBatch, mediaArr, storeBatch);
     for (let j = 0; j < options.length; j++) {
       const option = options[j];
       for (let i = 0; i < settings.IPS; i++) {
@@ -353,7 +352,6 @@ async function addImage() {
         filerecord.original.name = name;
         filerecord.metadata.productId = products[k];
         filerecord.metadata.variantId = option._id;
-        filerecord.metadata.shopId = option.shopId;
         for (const store of stores) {
           const storeName = store.name;
           const ID = ObjectID();
@@ -365,7 +363,7 @@ async function addImage() {
           chunksTemplate.files_id = ID;
           // const imageData = await createImage(storeName);
           // chunksTemplate.data = Binary(imageData);
-          chunksTemplate.data = createImage(storeName, settings.optionsImageCached);
+          chunksTemplate.data = binaryCachedImages[storeName];
           storeBatch[storeName].files.insert(filesTemplate);
           storeBatch[storeName].chunks.insert(chunksTemplate);
           filerecord.copies[storeName].key = ID.toString();
@@ -377,7 +375,7 @@ async function addImage() {
             "productId" : products[k],
             "variantId" : option._id,
             "toGrid" : 1,
-            "shopId" : option.shopId,
+            "shopId" : "J8Bhq3uTtdgwZx3rz",
             "priority" : 0,
             "workflow" : "published"
           },
@@ -478,6 +476,18 @@ function addOrder() {
 }
 
 
+function addDiscounts() {
+  const discountBatch = Discounts.initializeUnorderedBulkOp({ useLegacyOps: true });
+  for (let i = 0; i < settings.discounts; i++) {
+    const discount = _.cloneDeep(discountTemplate);
+    discount._id = randomID(20, "aA0");
+    discount.code = `${discount.code}-${i}`;
+    discount.discount = `${(100.0 / settings.discounts) * (i + 1)}%`
+    discountBatch.insert(discount);
+  }
+  return discountBatch.execute();
+}
+
 async function addOrders() {
   const numOfOrders = settings.orders || 1000;
   let batch = Orders.initializeUnorderedBulkOp({ useLegacyOps: true });
@@ -509,7 +519,7 @@ export async function loadDataset() {
   const promiseArr = []
   const batchSize = 3;
   console.log("Starting Tags, Orders");
-  await addTags();
+  await Promise.all([addTags(), addDiscounts()]);
   console.log("Finished Tags, Orders in", now() - s)
   s = now() 
   console.log("Started making products promise");

@@ -385,6 +385,24 @@ export const tagTemplate = {
 	"groups": []
 }
 
+export const discountTemplate = {
+  "code" : "Coupon",
+  "discount" : "0.1%",
+  "conditions" : {
+      "accountLimit" : 100,
+      "redemptionLimit" : 100,
+      "order" : {
+          "min" : 0
+      },
+      "enabled" : true
+  },
+  "calculation" : {
+      "method" : "discount"
+  },
+  "discountMethod" : "code",
+  "shopId" : "J8Bhq3uTtdgwZx3rz"
+}
+
 export const filerecordTemplate = {
   "_id" : "3JoatDkgzQciP3FvkS7H",
   "original" : {

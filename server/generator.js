@@ -13,12 +13,13 @@ const dev = {
     tags: 10,
     variations: [1, 2, 4, 5],
     IPS: 3,
+    discounts: 100,
     attributes: 10,
     duration: 1,
     productBatchSize: 3000,
     imageBatchSize: 5000,
-    optionsImageCached: false,
-    primaryImageCached: false
+    optionsImageCached: true,
+    primaryImageCached: true
 }
 const ret = {
     dbName: "ret",
@@ -27,12 +28,13 @@ const ret = {
     tags: 100,
     variations: [1, 2, 5, 20],
     IPS: 5,
+    discounts: 100,
     attributes: 20,
     duration: 3,
     productBatchSize: 2500,
     imageBatchSize: 5000,
-    optionsImageCached: false,
-    primaryImageCached: false
+    optionsImageCached: true,
+    primaryImageCached: true
 }
 const mid = {
     dbName: "mid",
@@ -41,12 +43,13 @@ const mid = {
     tags: 1000,
     variations: [1, 2, 5, 20],
     IPS: 7,
+    discounts: 10000,
     attributes: 20,
     duration: 3,
     productBatchSize: 2000,
     imageBatchSize: 5000,
     optionsImageCached: true,
-    primaryImageCached: false
+    primaryImageCached: true
 }
 const ent = {
     dbName: "ent",
@@ -55,6 +58,7 @@ const ent = {
     tags: 4000,
     variations: [1, 2, 5, 200],
     IPS: 9,
+    discounts: 100000,
     attributes: 40,
     duration: 3,
     productBatchSize: 1000,
