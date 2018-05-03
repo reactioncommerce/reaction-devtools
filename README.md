@@ -29,16 +29,16 @@
 1. `cd ../build`
 1. `cd bundle/programs/server/`
 1. `npm install`
-1. Then execute the steps from below for the data that you want to run.
+1. copy the `reaction_ret` and `reaction_mid` files to `/home/ec2-user`
+1. Run `crontab -e`
+1. Add this line to the crontab: `@reboot /home/ec2-user/reaction_ret` for the "retailer" version
+1. Add this line to the crontab: `@reboot /home/ec2-user/reaction_mid` for the "mid-erprise" version
+1. Then execute the steps from below for the data that you want to run
 
 # Starting Reaction
-To start with Mid-erprise Retailer data
-1. ssh into the system
-1. `screen -S mid`
-1. `cd build/bundle/`
-1. `MONGO_URL=mongodb://172.31.18.209:27017/meteor ROOT_URL=http://localhost.com PORT=5000 node --max_old_space_size=8192 main.js`
-1. `Ctrl + a` (detach from screen)
-1. The app will be available at <SERVER_IP>:5000
+1. Reaction will start automatically
+1. If you want to restart it run `/home/ec2-home/reaction_ret &` or `/home/ec2-home/reaction_mid &`
+1. The app will be available on port 4000 for "ret" and 5000 for "mid"
 
 To start with Mid Retailer data
 1. ssh into the system
