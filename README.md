@@ -1,6 +1,9 @@
 # Data Setup
 1. ssh into the system
-2. `cd reaction-devtools`
+1. git clone `https://github.com/reactioncommerce/reaction-devtools`
+1. `cd reaction-devtools`
+1. `git fetch origin akarshit-load-data`
+1. `npm install`
 3. Edit server/generator.js's line `const settings = _.clone(dev);`
 4. Replace `dev` with the type of data to be loaded, options are `dev`, `ret`, `mid`, `ent`.
 5. Run `npx babel-node server/generator.js --max_old_space_size=8192 --presets es2015,stage-2`
@@ -44,7 +47,7 @@ To start with Mid Retailer data
 1. ssh into the system
 1. `screen -S ret`
 1. `cd build/bundle/`
-1. `MONGO_URL=mongodb://172.31.18.209:27017/ret ROOT_URL=http://localhost.com PORT=4000 node --max_old_space_size=8192 main.js`
+1. `MONGO_URL=mongodb://172.31.18.209:27017/ret ROOT_URL=http://localhost.com PORT=4000 node --max_old_space_size=32768 main.js`
 1. `Ctrl + a` (detach from screen)
 1. The app will be available at <SERVER_IP>:4000
 
