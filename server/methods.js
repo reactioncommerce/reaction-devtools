@@ -481,7 +481,7 @@ function addDiscounts() {
   for (let i = 0; i < settings.discounts; i++) {
     const discount = _.cloneDeep(discountTemplate);
     discount._id = randomID(20, "aA0");
-    discount.code = `${discount.code}-${i}`;
+    discount.code = `${discount.code}-${workerId}-${i}`;
     discount.discount = (100.0 / settings.discounts) * (i + 1)
     discountBatch.insert(discount);
   }
