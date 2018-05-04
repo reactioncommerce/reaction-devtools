@@ -43,23 +43,14 @@
 1. If you want to restart it run `/home/ec2-home/reaction_ret &` or `/home/ec2-home/reaction_mid &`
 1. The app will be available on port 4000 for "ret" and 5000 for "mid"
 
-To start with Mid Retailer data
-1. ssh into the system
-1. `screen -S ret`
-1. `cd build/bundle/`
-1. `MONGO_URL=mongodb://172.31.18.209:27017/ret ROOT_URL=http://localhost.com PORT=4000 node --max_old_space_size=32768 main.js`
-1. `Ctrl + a` (detach from screen)
-1. The app will be available at <SERVER_IP>:4000
 
 # Stopping Reaction
-1. ssh into the system
-1. List screens running `screen -ls`
-2. Attach the screen `screen -r mid` or `screen -r ret`
-3. Stop reactoin `Ctrl + C`
-4. Exit from the screen `exit`
+1. ssh into the app server
+1. Issue `ps aux | grep -i node`
+1. Kill the tasks that show up there (unfortunately you can't tell which is which currently)
 
 ## Tips
-1. To be able to signin(or atleast see the option for it), you might need to zoom out on your browser.
+1. To be able to signin (or at least see the option for it), you might need to zoom out on your browser.
 2. Right now when you scroll to the bottom, more products are not loaded. I guess this is a problem with reaction itself since we get the error
 ```
 loadProducts is not a function
