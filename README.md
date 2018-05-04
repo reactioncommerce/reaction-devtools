@@ -20,6 +20,8 @@
 1. `. ~/.bashrc`
 1. `n 8.9.4`
 1. `git clone https://github.com/reactioncommerce/reaction.git`
+1. `git fetch origin fix-4090-akarshit-load-more`
+1. `git merge origin/fix-4090-akarshit-load-more`
 1. `mkdir build`
 1. `cd reaction`
 1. `sudo yum groupinstall "Development Tools" -y`
@@ -30,6 +32,7 @@
 1. `meteor npm install`
 1. `meteor build --directory ../build`
 1. `cd ../build`
+1. `tar xvzf reaction.tar.gz`
 1. `cd bundle/programs/server/`
 1. `npm install`
 1. copy the `reaction_ret` and `reaction_mid` files to `/home/ec2-user`
@@ -40,7 +43,7 @@
 
 # Starting Reaction
 1. Reaction will start automatically
-1. If you want to restart it run `/home/ec2-home/reaction_ret &` or `/home/ec2-home/reaction_mid &`
+1. If you want to restart it run `/home/ec2-user/reaction_ret &` or `/home/ec2-user/reaction_mid &`
 1. The app will be available on port 4000 for "ret" and 5000 for "mid"
 
 
