@@ -1,5 +1,4 @@
 import faker from "faker";
-import sharp from "sharp";
 import now from "performance-now";
 import _ from "lodash";
 import slugify from "slugify";
@@ -7,64 +6,15 @@ var fs = require("fs");
 import randomID from "random-id";
 import { MongoClient, ObjectID, Binary } from 'mongodb';
 import { productTemplate, variantTemplate, optionTemplate, orderTemplate, filerecordTemplate, copiesTemplate, tagTemplate, metadata, discountTemplate } from "./dataset";
+import * as images from "./images";
 
 let Tags, Catalog, Products, ProductSearch, OrderSearch, Orders, Media, Discounts, workerId = 0;
 let settings = {};
 const storeDbs = {};
 let stores = null;
 let db = null;
-let data;
-let mediaBatch;
-let mediaBatchLength = 0;
 let tags = [];
-const imagesPromise = [];
-const conversionPromises = [];
 const optionsMap = {};
-let cachedImages = {};
-let binaryCachedImages = {};
-
-async function cacheImages() {
-    console.log("Caching conversions");
-    const r = Math.floor(Math.random() * 256);
-    const g = Math.floor(Math.random() * 256);
-    const b = Math.floor(Math.random() * 256);
-    cachedImages.image = await sharp({
-        create: {
-            width: 600,
-            height: 600,
-            channels: 3,
-            background: { r, g, b }
-        }
-        })
-        .jpeg()
-        .toBuffer();
-    cachedImages.large = cachedImages.image;
-    cachedImages.medium = cachedImages.image;
-    cachedImages.small = await sharp({
-        create: {
-            width: 235,
-            height: 235,
-            channels: 3,
-            background: { r, g, b }
-        }
-        })
-        .png()
-        .toBuffer();
-    cachedImages.thumbnail = await sharp({
-        create: {
-            width: 100,
-            height: 100,
-            channels: 3,
-            background: { r, g, b }
-        }
-        })
-        .png()
-        .toBuffer();
-    Object.keys(cachedImages).forEach((key) => {
-      binaryCachedImages[key] = Binary(cachedImages[key]);
-    });
-        
-}
 
 export async function init(id, sett) {
   workerId = id;
@@ -103,8 +53,7 @@ export async function init(id, sett) {
       chunks: db.collection(`cfs_gridfs.${store.name}.chunks`)
     } 
   };
-  mediaBatch = Media.initializeUnorderedBulkOp({useLegacyOps: true})
-  await cacheImages();
+  await images.init();
 }
 
 // var lock = new ReadWriteLock();
@@ -153,59 +102,6 @@ function getPrimaryProduct(variant) {
   return parent;
 }
 
-/**
- * @method generateImage
- * @summary Generates an random colored image with specified width, height and quality
- * @param {number} width - width of the image
- * @param {number} height - height of the image
- * @param {number} quality - quality of the image
- * @param {function} callback - callback
- */
-async function createImage(storeName, caching = true) {
-  if (caching) {
-    return binaryCachedImages[storeName];
-  }
-  const r = Math.floor(Math.random() * 256);
-  const g = Math.floor(Math.random() * 256);
-  const b = Math.floor(Math.random() * 256);
-  let img;
-  if (storeName === "small") {
-    img = await sharp({
-      create: {
-          width: 235,
-          height: 235,
-          channels: 3,
-          background: { r, g, b }
-      }
-      })
-      .png()
-      .toBuffer();
-  } else if (storeName === "thumbnail") {
-    img = await sharp({
-      create: {
-          width: 100,
-          height: 100,
-          channels: 3,
-          background: { r, g, b }
-      }
-      })
-      .png()
-      .toBuffer();
-    
-  } else {
-    img = await sharp({
-      create: {
-          width: 600,
-          height: 600,
-          channels: 3,
-          background: { r, g, b }
-      }
-      })
-      .jpeg()
-      .toBuffer();
-  }
-  return Binary(img);
-}
 
 /**
  * @method addProduct
@@ -301,7 +197,7 @@ async function addPrimaryImage(productId, fileRecordBatch, mediaArr, storeBatch)
     }
     filesTemplate._id = ID;
     chunksTemplate.files_id = ID;
-    chunksTemplate.data = await createImage(storeName, settings.primaryImageCached);
+    chunksTemplate.data = await images.createImage(storeName, settings.primaryImageCached);
     storeBatch[storeName].files.insert(filesTemplate);
     storeBatch[storeName].chunks.insert(chunksTemplate);
     filerecord.copies[storeName].key = ID.toString();
@@ -363,7 +259,7 @@ async function addImage() {
           chunksTemplate.files_id = ID;
           // const imageData = await createImage(storeName);
           // chunksTemplate.data = Binary(imageData);
-          chunksTemplate.data = binaryCachedImages[storeName];
+          chunksTemplate.data = images.getImage(storeName);
           storeBatch[storeName].files.insert(filesTemplate);
           storeBatch[storeName].chunks.insert(chunksTemplate);
           filerecord.copies[storeName].key = ID.toString();
@@ -491,7 +387,7 @@ function addDiscounts() {
 async function addOrders() {
   const numOfOrders = settings.orders || 1000;
   let batch = Orders.initializeUnorderedBulkOp({ useLegacyOps: true });
-  for (let i = 0; i < numOfOrders; i++) {
+  for (let i = 1; i <= numOfOrders; i++) {
     batch.insert(addOrder());
     if (i % 10000 === 0) {
       console.log(workerId, "Order Status", i, "done out of", numOfOrders);
