@@ -11,7 +11,7 @@ export async function init() {
         thumbnail: []
     }
     console.log("Caching conversions");
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 20; i++) {
         const r = Math.floor(Math.random() * 256);
         const g = Math.floor(Math.random() * 256);
         const b = Math.floor(Math.random() * 256);
@@ -54,9 +54,8 @@ export async function init() {
 }
 
 
-export function getImage(storeName) {
-    const val = binaryCachedImages[storeName][Math.floor(Math.random() * binaryCachedImages[storeName].length)];
-    return val;
+export function getImage(storeName, imageIndex) {
+    return binaryCachedImages[storeName][imageIndex];
 }
 
 /**

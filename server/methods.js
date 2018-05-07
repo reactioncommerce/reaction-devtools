@@ -182,43 +182,46 @@ function getTagsForProduct() {
 }
 
 async function addPrimaryImage(productId, fileRecordBatch, mediaArr, storeBatch) {
-  const name = `${randomID(10, "aA0")}.jpg`;
-  const filerecord = _.cloneDeep(filerecordTemplate);
-  filerecord._id = randomID(10, "aA0");
-  filerecord.original.name = name;
-  filerecord.metadata.productId = productId;
-  filerecord.metadata.variantId = productId;
-  for (const store of stores) {
-    const storeName = store.name;
-    const ID = ObjectID();
-    const filesTemplate = _.cloneDeep(copiesTemplate[storeName].files);
-    const chunksTemplate = {
-      n: 0
+  for (let i = 0; i < settings.IPS; i++) {
+    const name = `${randomID(10, "aA0")}.jpg`;
+    const filerecord = _.cloneDeep(filerecordTemplate);
+    filerecord._id = randomID(10, "aA0");
+    filerecord.original.name = name;
+    filerecord.metadata.productId = productId;
+    filerecord.metadata.variantId = productId;
+    const imageIndex = Math.floor(Math.random() * 20);
+    for (const store of stores) {
+      const storeName = store.name;
+      const ID = ObjectID();
+      const filesTemplate = _.cloneDeep(copiesTemplate[storeName].files);
+      const chunksTemplate = {
+        n: 0
+      }
+      filesTemplate._id = ID;
+      chunksTemplate.files_id = ID;
+      chunksTemplate.data = images.getImage(storeName, imageIndex);
+      storeBatch[storeName].files.insert(filesTemplate);
+      storeBatch[storeName].chunks.insert(chunksTemplate);
+      filerecord.copies[storeName].key = ID.toString();
+      filerecord.copies[storeName].name = name;
     }
-    filesTemplate._id = ID;
-    chunksTemplate.files_id = ID;
-    chunksTemplate.data = await images.createImage(storeName, settings.primaryImageCached);
-    storeBatch[storeName].files.insert(filesTemplate);
-    storeBatch[storeName].chunks.insert(chunksTemplate);
-    filerecord.copies[storeName].key = ID.toString();
-    filerecord.copies[storeName].name = name;
+    fileRecordBatch.insert(filerecord);
+    mediaArr.push({
+      "metadata" : {
+        "productId" : productId,
+        "variantId" : productId,
+        "toGrid" : 1,
+        "shopId" : "J8Bhq3uTtdgwZx3rz",
+        "priority" : 0,
+        "workflow" : "published"
+      },
+      "thumbnail" : `/assets/files/Media/${filerecord._id}/thumbnail/${name}`,
+      "small" : `/assets/files/Media/${filerecord._id}/small/${name}`,
+      "medium" : `/assets/files/Media/${filerecord._id}/medium/${name}`,
+      "large" : `/assets/files/Media/${filerecord._id}/large/${name}`,
+      "image" : `/assets/files/Media/${filerecord._id}/image/${name}`
+    });
   }
-  fileRecordBatch.insert(filerecord);
-  mediaArr.push({
-    "metadata" : {
-      "productId" : productId,
-      "variantId" : productId,
-      "toGrid" : 1,
-      "shopId" : "J8Bhq3uTtdgwZx3rz",
-      "priority" : 0,
-      "workflow" : "published"
-    },
-    "thumbnail" : `/assets/files/Media/${filerecord._id}/thumbnail/${name}`,
-    "small" : `/assets/files/Media/${filerecord._id}/small/${name}`,
-    "medium" : `/assets/files/Media/${filerecord._id}/medium/${name}`,
-    "large" : `/assets/files/Media/${filerecord._id}/large/${name}`,
-    "image" : `/assets/files/Media/${filerecord._id}/image/${name}`
-  });
 }
 
 async function addImage() {
@@ -248,6 +251,7 @@ async function addImage() {
         filerecord.original.name = name;
         filerecord.metadata.productId = products[k];
         filerecord.metadata.variantId = option._id;
+        const imageIndex = Math.floor(Math.random() * 20);
         for (const store of stores) {
           const storeName = store.name;
           const ID = ObjectID();
@@ -259,7 +263,7 @@ async function addImage() {
           chunksTemplate.files_id = ID;
           // const imageData = await createImage(storeName);
           // chunksTemplate.data = Binary(imageData);
-          chunksTemplate.data = images.getImage(storeName);
+          chunksTemplate.data = images.getImage(storeName, imageIndex);
           storeBatch[storeName].files.insert(filesTemplate);
           storeBatch[storeName].chunks.insert(chunksTemplate);
           filerecord.copies[storeName].key = ID.toString();
