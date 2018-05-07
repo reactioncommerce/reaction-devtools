@@ -1,6 +1,6 @@
 # Data Setup
 1. ssh into the system
-1. git clone `https://github.com/reactioncommerce/reaction-devtools`
+1. `git clone https://github.com/reactioncommerce/reaction-devtools`
 1. `cd reaction-devtools`
 1. `git fetch origin akarshit-load-data`
 1. `npm install`
@@ -43,15 +43,23 @@
 
 # Starting Reaction
 1. Reaction will start automatically
-1. If you want to restart it run `/home/ec2-user/reaction_ret &` or `/home/ec2-user/reaction_mid &`
-1. The app will be available on port 4000 for "ret" and 5000 for "mid"
-
+1. Make sure pm2 knows about reaction, run `pm2 list`
+1. If you don't see "reaction-ret" run `pm2 start reaction.json`
+1. If you see "reaction-ret" run `pm2 restart reaction-ret`
+1. If you want to restart it run `pm2 restart reaction-ret`
+1. The app will be available on port 4000 for "ret"
+1. To monitor the app use `pm2 monit`
+1. To see the logs use `pm2 logs`/ `pm2 logs --lines 1000`
+1. The pm2 configuration file is at `~/reaction.json`
 
 # Stopping Reaction
 1. ssh into the app server
-1. Issue `ps aux | grep -i node`
-1. Kill the tasks that show up there (unfortunately you can't tell which is which currently)
+1. Issue `pm2 kill`
 
 ## Tips
 1. To be able to signin (or at least see the option for it), you might need to zoom out on your browser.
 1. If something stops loading at all, try a refresh without cache(Cmd + Shift + R).
+
+## Server modification
+1. App restarts if it takes more than 3GB of mem.
+1. 
