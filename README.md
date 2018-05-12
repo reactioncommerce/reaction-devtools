@@ -59,3 +59,65 @@
 1. App restarts if it takes more than 3GB of mem for 30 secs.
 1. Giving node process memory max memory of 32GB.
 1. Increased the sort memory limit to 1GB for mongo.
+
+
+## Kadira setup
+1. `git clone https://github.com/lampe/kadira-server.git`
+1. Enabled replication in mongod, by adding following in `/etc/mongod.cong`
+```
+replication:
+  replSetName: kadira
+```
+1. `sudo service mongod restart`
+1. `mongo admin --eval 'rs.initiate({_id: "kadira", members:[{_id : 0, host : "localhost:27017"},]})'`
+1. `mongo admin --eval 'rs.slaveOk()'`
+1. `mongo`
+1. `use kadiraApps`
+1. `db.createUser({ user: "reaction", pwd: "reaction", roles: [ "readWrite", "dbAdmin" ]})`
+1. `use kadiraData`
+1. `db.createUser({ user: "reaction", pwd: "reaction", roles: [ "readWrite", "dbAdmin" ]})`
+1. `cd ~/kadira-server`
+1. edit `init-shell.sh` with 
+```export APP_MONGO_URL="mongodb://reaction:reaction@localhost:27017/kadiraApps"
+export APP_MONGO_OPLOG_URL="mongodb://localhost:27017/local"
+export DATA_MONGO_URL="mongodb://reaction:reaction@localhost:27017/kadiraData"
+export UI_PORT=6000
+export AWS_DEFAULT_REGION="us-east-2"
+export AWS_ACCESS_KEY_ID="<ID>"
+export AWS_SECRET_ACCESS_KEY="<KEY>"
+export AWS_BUCKET="reaction-kadira"
+```
+1. Change `s3url` in `kadira-ui/settings.json`
+1. `curl --silent --location https://rpm.nodesource.com/setup_8.x | sudo bash -`
+1. `sudo yum -y install nodejs`
+1. `cd ~/kadira-server/kadira-engine`
+1. `npm install`
+1. `chmod +x ../init-shell.sh`
+1. `source ../init-shell.sh`
+1. `chmod +x run.sh`
+1. `./run.sh`
+1. In a separate shell `mongo`
+1. `use kadiraData`
+1. ```
+db.mapReduceProfileConfig.insert({lastTime: new Date(), _id:{profile:'1min',provider:'methods',shard:"one"}})
+db.mapReduceProfileConfig.insert({lastTime: new Date(), _id:{profile:'1min',provider:'errors',shard:"one"}})
+db.mapReduceProfileConfig.insert({lastTime: new Date(), _id:{profile:'1min',provider:'pubsub',shard:"one"}})
+db.mapReduceProfileConfig.insert({lastTime: new Date(), _id:{profile:'1min',provider:'system',shard:"one"}})
+db.mapReduceProfileConfig.insert({lastTime: new Date(), _id:{profile:'3hour',provider:'methods',shard:"one"}})
+db.mapReduceProfileConfig.insert({lastTime: new Date(), _id:{profile:'3hour',provider:'errors',shard:"one"}})
+db.mapReduceProfileConfig.insert({lastTime: new Date(), _id:{profile:'3hour',provider:'pubsub',shard:"one"}})
+db.mapReduceProfileConfig.insert({lastTime: new Date(), _id:{profile:'3hour',provider:'system',shard:"one"}})
+db.mapReduceProfileConfig.insert({lastTime: new Date(), _id:{profile:'30min',provider:'methods',shard:"one"}})
+db.mapReduceProfileConfig.insert({lastTime: new Date(), _id:{profile:'30min',provider:'errors',shard:"one"}})
+db.mapReduceProfileConfig.insert({lastTime: new Date(), _id:{profile:'30min',provider:'pubsub',shard:"one"}})
+db.mapReduceProfileConfig.insert({lastTime: new Date(), _id:{profile:'30min',provider:'system',shard:"one"}})
+```
+1. `cd ~/kadira-server/kadira-rma`
+1. `npm install`
+1. `./run.sh`
+1. In new shell `cd ~/kadira-server/kadira-ui`
+1. `curl https://install.meteor.com/ | sh`
+1. `. ~/.bashrc`
+1. `meteor npm install --save bcrypt`
+1. `meteor npm install`
+1. 
