@@ -73,15 +73,15 @@ replication:
 1. `mongo admin --eval 'rs.slaveOk()'`
 1. `mongo`
 1. `use kadiraApps`
-1. `db.createUser({ user: "reaction", pwd: "reaction", roles: [ "readWrite", "dbAdmin" ]})`
+1. `db.createUser({ user: "admin", pwd: "admin", roles: [ "readWrite", "dbAdmin" ]})`
 1. `use kadiraData`
-1. `db.createUser({ user: "reaction", pwd: "reaction", roles: [ "readWrite", "dbAdmin" ]})`
+1. `db.createUser({ user: "admin", pwd: "admin", roles: [ "readWrite", "dbAdmin" ]})`
 1. `cd ~/kadira-server`
 1. edit `init-shell.sh` with 
-```export APP_MONGO_URL="mongodb://reaction:reaction@localhost:27017/kadiraApps"
+```export APP_MONGO_URL="mongodb://admin:admin@localhost:27017/kadiraApps"
 export APP_MONGO_OPLOG_URL="mongodb://localhost:27017/local"
-export DATA_MONGO_URL="mongodb://reaction:reaction@localhost:27017/kadiraData"
-export UI_PORT=6000
+export DATA_MONGO_URL="mongodb://admin:admin@localhost:27017/kadiraData"
+export UI_PORT=8000
 export AWS_DEFAULT_REGION="us-east-2"
 export AWS_ACCESS_KEY_ID="<ID>"
 export AWS_SECRET_ACCESS_KEY="<KEY>"
@@ -90,13 +90,7 @@ export AWS_BUCKET="reaction-kadira"
 1. Change `s3url` in `kadira-ui/settings.json`
 1. `curl --silent --location https://rpm.nodesource.com/setup_8.x | sudo bash -`
 1. `sudo yum -y install nodejs`
-1. `cd ~/kadira-server/kadira-engine`
-1. `npm install`
-1. `chmod +x ../init-shell.sh`
-1. `source ../init-shell.sh`
-1. `chmod +x run.sh`
-1. `./run.sh`
-1. In a separate shell `mongo`
+1. `mongo`
 1. `use kadiraData`
 1. ```
 db.mapReduceProfileConfig.insert({lastTime: new Date(), _id:{profile:'1min',provider:'methods',shard:"one"}})
@@ -112,12 +106,40 @@ db.mapReduceProfileConfig.insert({lastTime: new Date(), _id:{profile:'30min',pro
 db.mapReduceProfileConfig.insert({lastTime: new Date(), _id:{profile:'30min',provider:'pubsub',shard:"one"}})
 db.mapReduceProfileConfig.insert({lastTime: new Date(), _id:{profile:'30min',provider:'system',shard:"one"}})
 ```
+1. In a screen:
+1. `cd ~/kadira-server/kadira-engine`
+1. `npm install`
+1. `chmod +x ../init-shell.sh`
+1. `source ../init-shell.sh`
+1. `chmod +x run.sh`
+1. `./run.sh`
+1. In a screen:
 1. `cd ~/kadira-server/kadira-rma`
 1. `npm install`
 1. `./run.sh`
+1. In a screen:
 1. In new shell `cd ~/kadira-server/kadira-ui`
 1. `curl https://install.meteor.com/ | sh`
 1. `. ~/.bashrc`
 1. `meteor npm install --save bcrypt`
 1. `meteor npm install`
-1. 
+1. `meteor shell`
+1. Accounts.createUser({username:'admin', email:'admin@reactioncommerce.com', password:<password>})
+1. `chmod +x run.sh`
+1. `source ../init-shell.sh`
+1. `./run.sh`
+1. Navigate to <serip>:8000.
+1. Add new "reaction" app.
+1. In the terminal `mongo`
+1. `use kadiraApps`
+1. `db.apps.update({}, { $set: { plan: "business", pricingType: "paid" } })
+1. Make sure ports 8000 and 11011 are accessible.
+1. SSH into the Reaction App Server.
+1. `cd reaction`
+1. `mkdir packages`
+1. `git clone https://github.com/Akarshit/kadira-binary-deps.git`
+1. `git clone https://github.com/Akarshit/kadira-profiler.git`
+1. `cd ..`
+1. `meteor add akarshit:kadira-binary-deps`
+1. `meteor add akarshit:kadira-profiler`
+1. Edit `~/reaction.json` and add the folling to `env` `"METEOR_SETTINGS": "{ \"kadira\": { \"appId\": \"<theAppId>\", \"appSecret\": \"<theAppSecret>\", \"options\": { \"endpoint\": \"http://<kadiraServer>:11011\" } } }"`
