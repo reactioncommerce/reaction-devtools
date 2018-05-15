@@ -92,7 +92,7 @@ export AWS_BUCKET="reaction-kadira"
 1. `sudo yum -y install nodejs`
 1. `mongo`
 1. `use kadiraData`
-1. ```
+```
 db.mapReduceProfileConfig.insert({lastTime: new Date(), _id:{profile:'1min',provider:'methods',shard:"one"}})
 db.mapReduceProfileConfig.insert({lastTime: new Date(), _id:{profile:'1min',provider:'errors',shard:"one"}})
 db.mapReduceProfileConfig.insert({lastTime: new Date(), _id:{profile:'1min',provider:'pubsub',shard:"one"}})
