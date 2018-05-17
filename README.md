@@ -63,6 +63,7 @@
 
 ## Kadira setup
 1. `git clone https://github.com/lampe/kadira-server.git`
+1. Install mongod v3.4
 1. Enabled replication in mongod, by adding following in `/etc/mongod.cong`
 ```
 replication:
@@ -87,7 +88,7 @@ export AWS_ACCESS_KEY_ID="<ID>"
 export AWS_SECRET_ACCESS_KEY="<KEY>"
 export AWS_BUCKET="reaction-kadira"
 ```
-1. Change `s3url` in `kadira-ui/settings.json`
+1. Change `s3url` in `~/kadira-server/kadira-ui/settings.json`
 1. `curl --silent --location https://rpm.nodesource.com/setup_8.x | sudo bash -`
 1. `sudo yum -y install nodejs`
 1. `mongo`
