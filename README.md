@@ -28,6 +28,10 @@
 1. `. ~/.bashrc`
 1. `meteor npm install --save bcrypt`
 1. `meteor npm install`
+1. Add `BrowserPolicy.content.allowOriginForAll("d267vurrx08r5d.cloudfront.net");` in `server/startup/browser-policy.js`
+1. Add ```if (Meteor.settings.cdnPrefix) {
+  Meteor.startup(() => WebAppInternals.setBundledJsCssPrefix(Meteor.settings.cdnPrefix));
+}``` in `server/startup/index.js`
 1. `meteor build --directory ../build`
 1. `cd ../build`
 1. `tar xvzf reaction.tar.gz`
