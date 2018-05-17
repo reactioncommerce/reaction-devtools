@@ -143,5 +143,5 @@ db.mapReduceProfileConfig.insert({lastTime: new Date(), _id:{profile:'30min',pro
 1. `cd ..`
 1. `meteor add akarshit:kadira-binary-deps`
 1. `meteor add akarshit:kadira-profiler`
-1. `meteor add meteorhacks:kadira` 
+1. `meteor add meteorhacks:kadira@2.30.4` 
 1. Edit `~/reaction.json` and add the folling to `env` `"METEOR_SETTINGS": "{ \"kadira\": { \"appId\": \"<theAppId>\", \"appSecret\": \"<theAppSecret>\", \"options\": { \"endpoint\": \"http://<kadiraServer>:11011\" } } }"`
