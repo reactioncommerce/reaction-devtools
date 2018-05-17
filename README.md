@@ -32,6 +32,16 @@
 1. Add ```if (Meteor.settings.cdnPrefix) {
   Meteor.startup(() => WebAppInternals.setBundledJsCssPrefix(Meteor.settings.cdnPrefix));
 }``` in `server/startup/index.js`
+1. SSH into the Reaction App Server.
+1. `cd reaction`
+1. `mkdir packages`
+1. `git clone https://github.com/Akarshit/kadira-binary-deps.git`
+1. `git clone https://github.com/Akarshit/kadira-profiler.git`
+1. `cd ..`
+1. `meteor add akarshit:kadira-binary-deps`
+1. `meteor add akarshit:kadira-profiler`
+1. `meteor add meteorhacks:kadira@2.30.4` 
+1. Edit `~/reaction.json` and add the folling to `env` `"METEOR_SETTINGS": "{ \"kadira\": { \"appId\": \"<theAppId>\", \"appSecret\": \"<theAppSecret>\", \"options\": { \"endpoint\": \"http://<kadiraServer>:11011\" } } }"`
 1. `meteor build --directory ../build`
 1. `cd ../build`
 1. `tar xvzf reaction.tar.gz`
@@ -139,13 +149,3 @@ db.mapReduceProfileConfig.insert({lastTime: new Date(), _id:{profile:'30min',pro
 1. `use kadiraApps`
 1. `db.apps.update({}, { $set: { plan: "business", pricingType: "paid" } })
 1. Make sure ports 8000 and 11011 are accessible.
-1. SSH into the Reaction App Server.
-1. `cd reaction`
-1. `mkdir packages`
-1. `git clone https://github.com/Akarshit/kadira-binary-deps.git`
-1. `git clone https://github.com/Akarshit/kadira-profiler.git`
-1. `cd ..`
-1. `meteor add akarshit:kadira-binary-deps`
-1. `meteor add akarshit:kadira-profiler`
-1. `meteor add meteorhacks:kadira@2.30.4` 
-1. Edit `~/reaction.json` and add the folling to `env` `"METEOR_SETTINGS": "{ \"kadira\": { \"appId\": \"<theAppId>\", \"appSecret\": \"<theAppSecret>\", \"options\": { \"endpoint\": \"http://<kadiraServer>:11011\" } } }"`
