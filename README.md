@@ -21,8 +21,8 @@
 1. `git clone https://github.com/reactioncommerce/reaction.git`
 1. `git fetch origin fix-4090-akarshit-load-more`
 1. `git merge origin/fix-4090-akarshit-load-more`
-1. `mkdir build`
-1. `cd reaction`
+1. `mkdir ~/build`
+1. `cd ~/reaction`
 1. `sudo yum groupinstall "Development Tools" -y`
 1. `curl https://install.meteor.com/ | sh`
 1. `. ~/.bashrc`
@@ -32,21 +32,32 @@
 1. Add ```if (Meteor.settings.cdnPrefix) {
   Meteor.startup(() => WebAppInternals.setBundledJsCssPrefix(Meteor.settings.cdnPrefix));
 }``` in `server/startup/index.js`
-1. SSH into the Reaction App Server.
-1. `cd reaction`
-1. `mkdir packages`
+1. `mkdir ~/reaction/packages`
 1. `git clone https://github.com/Akarshit/kadira-binary-deps.git`
 1. `git clone https://github.com/Akarshit/kadira-profiler.git`
-1. `cd ..`
+1. `cd ~/reaction`
 1. `meteor add akarshit:kadira-binary-deps`
 1. `meteor add akarshit:kadira-profiler`
 1. `meteor add meteorhacks:kadira@2.30.4` 
+1. `mkdir "${HOME}/.npm-packages"` (Steps for installing reaction-cli)
+1. `echo prefix=${HOME}/.npm-packages > ~/.npmrc`
+1. Add to `~/.bashrc` the following  
+```
+NPM_PACKAGES="${HOME}/.npm-packages"
+
+PATH="$NPM_PACKAGES/bin:$PATH"
+
+# Unset manpath so we can inherit from /etc/manpath via the `manpath` command
+unset MANPATH # delete if you already modified MANPATH elsewhere in your config
+export MANPATH="$NPM_PACKAGES/share/man:$(manpath)"
+```
+1. `. ~/.bashrc`
+1. `reaction` (this is needed to setup the imports)
 1. Edit `~/reaction.json` and add the folling to `env` `"METEOR_SETTINGS": "{ \"kadira\": { \"appId\": \"<theAppId>\", \"appSecret\": \"<theAppSecret>\", \"options\": { \"endpoint\": \"http://<kadiraServer>:11011\" } } }"`
 1. `meteor build --directory ../build`
-1. `cd ../build`
-1. `tar xvzf reaction.tar.gz`
-1. `cd bundle/programs/server/`
+1. `cd ~/bundle/programs/server/`
 1. `npm install`
+1. `cd ~`
 1. Copy reaction.json to `~/`
 1. Run `pm2 start reaction.json`
 
