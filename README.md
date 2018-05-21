@@ -54,12 +54,12 @@ export MANPATH="$NPM_PACKAGES/share/man:$(manpath)"
 ```
 1. `. ~/.bashrc`
 1. `reaction` (this is needed to setup the imports)
-1. Edit `~/reaction.json` and add the folling to `env` `"METEOR_SETTINGS": "{ \"kadira\": { \"appId\": \"<theAppId>\", \"appSecret\": \"<theAppSecret>\", \"options\": { \"endpoint\": \"http://<kadiraServer>:11011\" } } }"`
+1. `cp ~/reaction/reaction.json ~/reaction.json`
+1. Edit `~/reaction.json` and fill in the details.
 1. `meteor build --directory ../build`
 1. `cd ~/bundle/programs/server/`
 1. `npm install`
 1. `cd ~`
-1. Copy reaction.json to `~/`
 1. Run `pm2 start reaction.json`
 
 # Starting Reaction
