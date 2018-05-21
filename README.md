@@ -16,6 +16,7 @@
 # Reaction server setup
 1. ssh into the system
 1. `sudo yum install -y git`
+1. `curl --silent --location https://rpm.nodesource.com/setup_8.x | sudo bash -`
 1. `sudo yum install nodejs-8.9.4` (Make sure you use v8.9.4)
 1. `sudo npm install -g pm2`
 1. `git clone https://github.com/reactioncommerce/reaction.git`
