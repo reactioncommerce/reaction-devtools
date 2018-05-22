@@ -17,23 +17,21 @@
 1. ssh into the system
 1. `sudo yum install -y git`
 1. `curl --silent --location https://rpm.nodesource.com/setup_8.x | sudo bash -`
-1. `sudo yum install nodejs-8.9.4` (Make sure you use v8.9.4)
+1. `sudo yum install -y nodejs-8.9.4` (Make sure you use v8.9.4)
 1. `sudo npm install -g pm2`
-1. `git clone https://github.com/reactioncommerce/reaction.git`
-1. `git fetch origin fix-4090-akarshit-load-more`
-1. `git merge origin/fix-4090-akarshit-load-more`
-1. `mkdir ~/build`
-1. `cd ~/reaction`
 1. `sudo yum groupinstall "Development Tools" -y`
 1. `curl https://install.meteor.com/ | sh`
 1. `. ~/.bashrc`
+1. `git clone https://github.com/reactioncommerce/reaction.git`
+1. `mkdir ~/build`
+1. `cd ~/reaction`
 1. `meteor npm install --save bcrypt`
 1. `meteor npm install`
 1. Add `BrowserPolicy.content.allowOriginForAll("d267vurrx08r5d.cloudfront.net");` in `server/startup/browser-policy.js`
 1. Add ```if (Meteor.settings.cdnPrefix) {
   Meteor.startup(() => WebAppInternals.setBundledJsCssPrefix(Meteor.settings.cdnPrefix));
 }``` in `server/startup/index.js`
-1. `mkdir ~/reaction/packages`
+1. `mkdir ~/reaction/packages && cd ~/reaction/packages`
 1. `git clone https://github.com/Akarshit/kadira-binary-deps.git`
 1. `git clone https://github.com/Akarshit/kadira-profiler.git`
 1. `cd ~/reaction`
@@ -53,7 +51,9 @@ unset MANPATH # delete if you already modified MANPATH elsewhere in your config
 export MANPATH="$NPM_PACKAGES/share/man:$(manpath)"
 ```
 1. `. ~/.bashrc`
+1. `npm install -g reaction-cli`
 1. `reaction` (this is needed to setup the imports)
+1. `Ctrl + C` (after reaction starts)
 1. `cp ~/reaction/reaction.json ~/reaction.json`
 1. Edit `~/reaction.json` and fill in the details.
 1. `meteor build --directory ../build`
