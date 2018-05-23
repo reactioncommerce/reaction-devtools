@@ -33,7 +33,7 @@
   },
   "scripts": {
     "lint": "eslint .",
-    "start": "nodemon server/generator.js --exec babel-node --presets es2015,stage-2"
+    "start": "nodemon data/generator.js --exec babel-node --presets es2015,stage-2"
   },
   "eslintConfig": {
     "extends": "@reactioncommerce"

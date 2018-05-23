@@ -5,10 +5,12 @@ import slugify from "slugify";
 var fs = require("fs");
 import randomID from "random-id";
 import { MongoClient, ObjectID, Binary } from 'mongodb';
-import { productTemplate, variantTemplate, optionTemplate, orderTemplate, filerecordTemplate, copiesTemplate, tagTemplate, metadata, discountTemplate } from "./dataset";
+import { productTemplate, variantTemplate, optionTemplate, orderTemplate,
+   filerecordTemplate, copiesTemplate, tagTemplate, metadata, discountTemplate,
+   accountTemplate, userTemplate } from "./dataset";
 import * as images from "./images";
 
-let Tags, Catalog, Products, ProductSearch, OrderSearch, Orders, Media, Discounts, workerId = 0;
+let Tags, Catalog, Products, ProductSearch, OrderSearch, Orders, Media, Discounts, Users, Accounts, workerId = 0;
 let settings = {};
 const storeDbs = {};
 let stores = null;
@@ -47,6 +49,8 @@ export async function init(id, sett) {
   Orders = db.collection("Orders");
   Discounts = db.collection("Discounts");
   Media = db.collection("cfs.Media.filerecord");
+  Users = db.collection("users");
+  Accounts = db.collection("Accounts");
   for (const store of stores) {
     storeDbs[store.name] = {
       files: db.collection(`cfs_gridfs.${store.name}.files`),
@@ -345,6 +349,43 @@ async function addTags() {
   return batch.execute();
 }
 
+async function addUsers() {
+  const numOfUsers = settings.orders || 1000;
+  let userBatch = Users.initializeUnorderedBulkOp({ useLegacyOps: true });
+  let accountBatch = Accounts.initializeUnorderedBulkOp({ useLegacyOps: true });
+
+  for (let i = 1; i <= numOfUsers; i++) {
+    const user = _.cloneDeep(userTemplate);
+    const name = `user-${workerId}-${i}`;
+    const email = `${name}@reactioncommerce.com`;
+    user._id = randomID(12, "aA0");
+    user.createdAt = new Date();
+    user.updatedAt = user.createdAt;
+    user.emails[0].address = email;
+    user.name = name;
+    userBatch.insert(user);
+  
+    const account = _.cloneDeep(accountTemplate);
+    account._id = user._id;
+    account.userId = user._id;
+    account.createdAt = user.createdAt;
+    account.updatedAt = user.updatedAt;
+    account.name = name;
+    account.profile.addressBook[0].fullName = name;
+    account.profile.addressBook[0]._id = randomID(20, "aA0");
+    account.emails[0].address = email;
+    accountBatch.insert(account);
+
+    if (i % 10000 === 0) {
+      console.log(workerId, "User Status", i, "/", numOfOrders);
+      await Promise.all([userBatch.execute(), accountBatch.execute()]);
+      userBatch = Users.initializeUnorderedBulkOp({ useLegacyOps: true });
+      accountBatch = Accounts.initializeUnorderedBulkOp({ useLegacyOps: true });
+    }
+  }
+  return Promise.all([userBatch.execute(), accountBatch.execute()]);
+}
+
 /**
 * @method addOrder
 * @summary Add a randomized order from a template
@@ -437,7 +478,7 @@ export async function loadDataset() {
   } catch (err) {
   }
   console.log("Time to index products =", now() - s);
-  await addOrders();
+  await [addOrders(), addUsers()];
   // const products = Products.find({ type: "variant", ancestors: { $size: 2 } }, { _id: 1, ancestors: 1 });
   s = now();
   console.log("Adding images");
@@ -460,6 +501,8 @@ export async function resetData() {
   await ProductSearch.remove({});
   await OrderSearch.remove({});
   await Orders.remove({});
+  await Users.remove({ "roles.J8Bhq3uTtdgwZx3rz" : { $ne: "admin"} });
+  await Accounts.remove({ "emails.0.address": { $ne: "admin@localhost" } });
   await resetMedia();
   console.log("Reset done");
 };

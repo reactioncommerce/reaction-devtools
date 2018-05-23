@@ -4,9 +4,9 @@
 1. `cd reaction-devtools`
 1. `git fetch origin akarshit-load-data`
 1. `npm install`
-3. Edit server/generator.js's line `const settings = _.clone(dev);`
+3. Edit data/generator.js's line `const settings = _.clone(dev);`
 4. Replace `dev` with the type of data to be loaded, options are `dev`, `ret`, `mid`, `ent`.
-5. Run `npx babel-node server/generator.js --max_old_space_size=8192 --presets es2015,stage-2`
+5. Run `npx babel-node data/generator.js --max_old_space_size=8192 --presets es2015,stage-2`
 
 # Starting mongo
 1. The mongod server is automatically started on server start.

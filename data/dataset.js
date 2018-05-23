@@ -385,6 +385,98 @@ export const tagTemplate = {
 	"groups": []
 }
 
+export const accountTemplate = {
+	"_id" : "7T7udgLbWPYPQabS5",
+	"createdAt" : "",
+	"emails" : [
+		{
+			"address" : "user-1@reactioncommerce.com",
+			"verified" : false,
+			"provides" : "default"
+		}
+	],
+	"profile" : {
+		"invited" : false,
+		"currency" : "USD",
+		"addressBook" : [
+			{
+				"country" : "US",
+				"fullName" : "",
+				"address1" : "123 Main St.",
+				"address2" : "",
+				"postal" : "90406",
+				"city" : "Santa Monica",
+				"region" : "California",
+				"phone" : "3238675309",
+				"isShippingDefault" : true,
+				"isBillingDefault" : true,
+				"isCommercial" : false,
+				"_id" : "",
+				"failedValidation" : false
+			},
+		]
+	},
+	"groups" : [
+		"Ft83kJfbzsdKNHE9C"
+	],
+	"userId" : "7T7udgLbWPYPQabS5",
+	"updatedAt" : "",
+	"shopId" : "J8Bhq3uTtdgwZx3rz",
+	"state" : "new",
+	"acceptsMarketing" : false,
+	"name" : ""
+}
+
+export const userTemplate = {
+	"_id" : "",
+	"createdAt" : "",
+	"services" : {
+		"password" : {
+			"bcrypt" : "$2a$10$1icGaxPkP03K6.nC4YDqIeTvHKbn1QJrQyXu.IvjsYmE4K/YnSL3u"
+		}
+	},
+	"emails" : [
+		{
+			"address" : "",
+			"verified" : false,
+			"provides" : "default"
+		}
+	],
+	"profile" : {
+		"addressBook" : {
+				"country" : "US",
+				"fullName" : "",
+				"address1" : "123 Main St.",
+				"address2" : "",
+				"postal" : "90406",
+				"city" : "Santa Monica",
+				"region" : "California",
+				"phone" : "3238675309",
+				"isShippingDefault" : true,
+				"isBillingDefault" : true,
+				"isCommercial" : false,
+				"_id" : ""
+			}
+	},
+	"roles" : {
+		"J8Bhq3uTtdgwZx3rz" : [
+			"guest",
+			"account/profile",
+			"product",
+			"tag",
+			"index",
+			"cart/checkout",
+			"cart/completed",
+			"notifications",
+			"reaction-paypal/paypalDone",
+			"reaction-paypal/paypalCancel",
+			"stripe/connect/authorize",
+			"account/verify"
+		]
+	},
+	"name" : "User"
+}
+
 export const discountTemplate = {
   "code" : "Coupon",
   "conditions" : {
