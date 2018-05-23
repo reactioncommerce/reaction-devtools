@@ -167,7 +167,7 @@ db.mapReduceProfileConfig.insert({lastTime: new Date(), _id:{profile:'30min',pro
 1. Navigate to http://35.165.27.196:8000/ login and create a new app with free plan.
 1. Copy the appId and appSecret from the page
 1. SSH into the kadira server
-1. `mongo kadiraApps --eval 'db.apps.update({}, { $set: { plan: "business", pricingType: "paid" } })'`
+1. `mongo kadiraApps --eval 'db.apps.updateMany({}, { $set: { plan: "business", pricingType: "paid" } })'`
 1. On local`cd <reaction-location>/packages`
 1. `git clone https://github.com/Akarshit/kadira-binary-deps.git`
 1. `git clone https://github.com/Akarshit/kadira-profiler.git`
