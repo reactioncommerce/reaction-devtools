@@ -7,6 +7,7 @@
 3. Edit server/generator.js's line `const settings = _.clone(dev);`
 4. Replace `dev` with the type of data to be loaded, options are `dev`, `ret`, `mid`, `ent`.
 5. Run `npx babel-node server/generator.js --max_old_space_size=8192 --presets es2015,stage-2`
+1. `db.createUser({user: "oplogger", pwd: "oplogger", roles: [{role: "read", db: "local"}]})`
 
 # Starting mongo
 1. The mongod server is automatically started on server start.
@@ -22,6 +23,7 @@
 1. `sudo yum groupinstall "Development Tools" -y`
 1. `curl https://install.meteor.com/ | sh`
 1. `. ~/.bashrc`
+1. `curl -OL https://github.com/reactioncommerce/reaction-devtools/raw/akarshit-load-data/reaction.json`
 1. `git clone https://github.com/reactioncommerce/reaction.git`
 1. `mkdir ~/build`
 1. `cd ~/reaction`
@@ -54,12 +56,11 @@ export MANPATH="$NPM_PACKAGES/share/man:$(manpath)"
 1. `npm install -g reaction-cli`
 1. `reaction` (this is needed to setup the imports)
 1. `Ctrl + C` (after reaction starts)
-1. `cp ~/reaction/reaction.json ~/reaction.json`
-1. Edit `~/reaction.json` and fill in the details.
 1. `meteor build --directory ../build`
-1. `cd ~/bundle/programs/server/`
+1. `cd ~/build/bundle/programs/server/`
 1. `npm install`
 1. `cd ~`
+1. Edit `~/reaction.json` and fill in the details.
 1. Run `pm2 start reaction.json`
 
 # Starting Reaction
@@ -155,9 +156,32 @@ db.mapReduceProfileConfig.insert({lastTime: new Date(), _id:{profile:'30min',pro
 1. `chmod +x run.sh`
 1. `source ../init-shell.sh`
 1. `./run.sh`
-1. Navigate to <serip>:8000.
+1. Navigate to <server-ip>:8000.
 1. Add new "reaction" app.
 1. In the terminal `mongo`
 1. `use kadiraApps`
 1. `db.apps.update({}, { $set: { plan: "business", pricingType: "paid" } })
 1. Make sure ports 8000 and 11011 are accessible.
+  
+## Connect kadira to local instance
+1. Navigate to http://35.165.27.196:8000/ login and create a new app with free plan.
+1. Copy the appId and appSecret from the page
+1. SSH into the kadira server
+1. `mongo kadiraApps --eval 'db.apps.update({}, { $set: { plan: "business", pricingType: "paid" } })'`
+1. On local`cd <reaction-location>/packages`
+1. `git clone https://github.com/Akarshit/kadira-binary-deps.git`
+1. `git clone https://github.com/Akarshit/kadira-profiler.git`
+1. `meteor add akarshit:kadira-binary-deps`
+1. `meteor add akarshit:kadira-profiler`
+1. `meteor add meteorhacks:kadira@2.30.4`
+1. Create `settings.json` file with the following content
+```
+{
+"kadira": {
+  "appId": <appId>,
+  "appSecret": <appSecret>,
+  "options": { "endpoint": "http://35.165.27.196:11011" }
+ }
+}
+```
+1. Navigate to http://35.165.27.196:8000/ to see the logs.
