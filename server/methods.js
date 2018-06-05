@@ -14,8 +14,8 @@ import { Products, ProductSearch, Tags, Packages, Jobs, Orders, OrderSearch, Cat
 import { Media } from "/imports/plugins/core/files/server";
 import { Logger } from "/server/api";
 import { productTemplate, variantTemplate, optionTemplate, orderTemplate } from "./dataset";
-import { publishProductsToCatalog, publishProductToCatalog } from "/imports/plugins/core/catalog/server/methods/catalog";
-
+import collections from "/imports/collections/rawCollections";
+import publishProductToCatalogById from "/imports/plugins/core/catalog/server/no-meteor/utils/publishProductToCatalogById";
 
 const methods = {};
 
@@ -43,7 +43,7 @@ function loadSmallProducts() {
     product.updatedAt = new Date();
     Products.insert(product, {}, { publish: true });
     if (product.type === "simple" && product.isVisible) {
-      publishProductToCatalog(product._id);
+      publishProductToCatalogById(product._id, collections);
     }
   });
   turnOnRevisions();
@@ -261,7 +261,6 @@ function attachProductImages(from = "random") {
     }
   }
   Logger.info("loaded product images");
-  // publishProductsToCatalog(imagesAdded);
 }
 
 /**
