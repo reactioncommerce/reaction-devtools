@@ -191,6 +191,58 @@ function createProductImage(product) {
   });
 }
 
+
+/**
+ * @method loadSwagShopProductImage
+ * @summary Load swag shop product image
+ * @param {object} product - the product to attach an image to
+ * @returns {object} fileObj - the file object that's been created
+ */
+function loadSwagShopProductImage(product) {
+  const filepath = `plugins/reaction-devtools/images/${product._id}.jpg`;
+  try {
+    const binary = Assets.getBinary(filepath);
+    const buffer = new Buffer(binary);
+    const fileName = `${product._id}.jpg`;
+    const fileRecord = new FileRecord({
+      original: {
+        name: fileName,
+        size: buffer.length,
+        type: "image/jpeg",
+        updatedAt: new Date()
+      }
+    });
+    fileRecord.attachData(buffer);
+    const { shopId } = product;
+    if (product.type === "simple") {
+      const topVariant = getTopVariant(product._id);
+      fileRecord.metadata = {
+        productId: product._id,
+        variantId: topVariant._id,
+        toGrid: 1,
+        shopId,
+        priority: 0,
+        workflow: "published"
+      };
+    } else {
+      const parent = getPrimaryProduct(product);
+      fileRecord.metadata = {
+        productId: parent._id,
+        variantId: product._id,
+        toGrid: 1,
+        shopId,
+        priority: 0,
+        workflow: "published"
+      };
+    }
+
+    Promise.await(Media.insert(fileRecord));
+    Promise.await(storeFromAttachedBuffer(fileRecord));
+  } catch {
+    return; // When image is not found, do nothing
+  }
+}
+
 /**
  * @method createProductImageFromUrl
  * @summary Pull a puppy image from the internet and attach it to a product
@@ -254,11 +306,16 @@ function attachProductImages(from = "random") {
     if (!productIdsWithMedia.includes(product._id && product.ancestors.length > 1)) {
       if (from === "web") {
         Promise.await(createProductImageFromUrl(product));
+      } else if (from === "swagshop") {
+        Promise.await(loadSwagShopProductImage(product));
       } else {
         Promise.await(createProductImage(product));
       }
       imagesAdded.push(product._id);
     }
+    if (product.type === "simple" && product.isVisible) { 
+      publishProductToCatalogById(product._id, collections); 
+    } 
   }
   Logger.info("loaded product images");
 }
@@ -533,7 +590,7 @@ methods.loadSmallOrders = function () {
  * @summary Generate random images and attach them to all products
  * @returns {undefined}
  */
-methods.loadImages = function (from) {
+methods.loadImages = function (from = "random") {
   check(from, String);
   attachProductImages(from);
 };

@@ -15,6 +15,16 @@ class DevTools extends Component {
     });
   }
 
+  handleSwagShopImagesClick = () => {
+    Meteor.call("devtools/loaddata/images", "swagshop", (error) => {
+      if (error) {
+        Alerts.toast(`Error loading images ${error.reason}`, "error");
+      } else {
+        Alerts.toast("Images loaded successfully", "success");
+      }
+    });
+  }
+
   handleImagesClick = () => {
     Meteor.call("devtools/loaddata/images", (error) => {
       if (error) {
@@ -136,7 +146,7 @@ class DevTools extends Component {
             bezelStyle={"solid"}
             primary={true}
             label={"Load Images"}
-            onClick={this.handleImagesClick}
+            onClick={this.handleSwagShopImagesClick}
           />
 
           <br />
