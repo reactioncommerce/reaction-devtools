@@ -22,7 +22,7 @@ function loadSmallProducts() {
     product.updatedAt = new Date();
     Products.insert(product, {}, { publish: true });
   });
-  Promise.await(attachProductImages("swagshop"))
+  Promise.await(attachProductImages());
   kickoffProductSearchRebuild();
   Logger.info("Products loaded");
 }
@@ -62,7 +62,7 @@ function getTopVariant(productId) {
  * @param {object} variant - the variant to find the parent for
  */
 function getPrimaryProduct(variant) {
-  const parent = Products.findOne({ _id: { $in: variant.ancestors  }, type: "simple" } );
+  const parent = Products.findOne({ _id: { $in: variant.ancestors }, type: "simple" });
   return parent;
 }
 
@@ -139,7 +139,7 @@ function loadSwagShopProductImage(product) {
 
     Promise.await(Media.insert(fileRecord));
     Promise.await(storeFromAttachedBuffer(fileRecord));
-  } catch {
+  } catch (e) {
     return; // When image is not found, do nothing
   }
 }
@@ -149,22 +149,22 @@ function loadSwagShopProductImage(product) {
  * @summary Generate an image and attach it to every product
  * @returns {undefined}
  */
-function attachProductImages(from = "random") {
+function attachProductImages() {
   Logger.info("Started loading product images");
   const products = Products.find({}).fetch();
   const productIds = products.map(({ _id }) => _id);
   const media = MediaRecords.find({ "metadata.productId": { $in: productIds } }).fetch();
   const productIdsWithMedia = _.uniq(media.map((doc) => doc.metadata.productId));
-  let imagesAdded = [];
+  const imagesAdded = [];
   for (const product of products) {
     // include top level products and options but not top-level variants
     if (!productIdsWithMedia.includes(product._id && product.ancestors.length > 1)) {
       Promise.await(loadSwagShopProductImage(product));
       imagesAdded.push(product._id);
     }
-    if (product.type === "simple" && product.isVisible) { 
-      publishProductToCatalogById(product._id, collections); 
-    } 
+    if (product.type === "simple" && product.isVisible) {
+      publishProductToCatalogById(product._id, collections);
+    }
   }
   Logger.info("loaded product images");
 }
@@ -207,6 +207,6 @@ function kickoffOrderSearchRebuild() {
 }
 
 export function loadSampleData() {
-    loadSmallProducts();
-    loadSmallTags();
+  loadSmallProducts();
+  loadSmallTags();
 }

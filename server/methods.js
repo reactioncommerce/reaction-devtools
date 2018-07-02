@@ -1,36 +1,29 @@
 import { Meteor } from "meteor/meteor";
 import { check, Match } from "meteor/check";
-import { Logger } from "/server/api";
-import { init, loadDataset, resetData } from "../../reaction-data-loader/data/methods.js"
+import { init, loadDataset, resetData } from "../../reaction-data-loader/data/methods.js";
 import { loadSampleData } from "./sampleData.js";
 
 const methods = {};
 
 methods.indexData = (settings) => {
   check(settings, Match.Optional(Object));
-  Promise.await(
-    init(1, settings)
+  Promise.await(init(1, settings)
     .then(resetData)
-    .then(loadDataset)
-  );
-}
+    .then(loadDataset));
+};
 
 methods.resetData = (settings) => {
   check(settings, Match.Optional(Object));
-  Promise.await(
-    init(1, settings)
-    .then(resetData)
-  );
-}
+  Promise.await(init(1, settings)
+    .then(resetData));
+};
 
 methods.sampleData = (settings) => {
   check(settings, Match.Optional(Object));
-  Promise.await(
-    init(1, settings)
+  Promise.await(init(1, settings)
     .then(resetData)
-    .then(loadSampleData)
-  );
-}
+    .then(loadSampleData));
+};
 
 export default methods;
 

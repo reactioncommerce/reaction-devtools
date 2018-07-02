@@ -1,12 +1,9 @@
-import React, { Component } from "react";
 import { Meteor } from "meteor/meteor";
-import { composeWithTracker, registerComponent } from "@reactioncommerce/reaction-components";
+import React, { Component } from "react";
+import { composeWithTracker, registerComponent, Components } from "@reactioncommerce/reaction-components";
 import { Button, SettingsCard } from "@reactioncommerce/reaction-ui";
-import { Components } from "@reactioncommerce/reaction-components";
-
 
 class DevTools extends Component {
-
   state = {
     mongoHost: "mongodb://localhost:3001",
     dbName: "meteor",
@@ -30,9 +27,9 @@ class DevTools extends Component {
       products: 100,
       orders: 100,
       tags: 3,
-      IPS: 3,
-    })
-  }
+      IPS: 3
+    });
+  };
 
   populateMediumDataset = () => {
     this.setState({
@@ -41,8 +38,8 @@ class DevTools extends Component {
       tags: 10,
       imageBatchSize: 5000,
       IPS: 5
-    })
-  }
+    });
+  };
 
   populateLargeDataset = () => {
     this.setState({
@@ -51,8 +48,8 @@ class DevTools extends Component {
       tags: 100,
       imageBatchSize: 3000,
       IPS: 7
-    })
-  }
+    });
+  };
 
   populateSampleDataset = () => {
     Meteor.call("devtools/sampleData", this.state, (error) => {
@@ -62,7 +59,7 @@ class DevTools extends Component {
         Alerts.toast("Sample data load successful", "success");
       }
     });
-  }
+  };
 
   handleResetData = () => {
     Meteor.call("devtools/resetData", this.state, (error) => {
@@ -72,7 +69,7 @@ class DevTools extends Component {
         Alerts.toast("Reset successful", "success");
       }
     });
-  }
+  };
 
   handleLoadData = () => {
     Meteor.call("devtools/loadData", this.state, (error) => {
@@ -82,13 +79,13 @@ class DevTools extends Component {
         Alerts.toast("Data loading successful", "success");
       }
     });
-  }
+  };
 
   handleChange = (event, value, name) => {
     this.setState({
       [name]: value
-    })
-  }
+    });
+  };
 
   render() {
     return (
@@ -98,95 +95,95 @@ class DevTools extends Component {
           expanded={true}
           showSwitch={false}
         >
-        <div id="datasets">
-          <Button
-            bezelStyle={"solid"}
-            label={"Small Dataset"}
-            onClick={this.populateSmallDataset}
-            className={"small"}
+          <div id="datasets">
+            <Button
+              bezelStyle={"solid"}
+              label={"Small Dataset"}
+              onClick={this.populateSmallDataset}
+              className={"small"}
+            />
+            <Button
+              bezelStyle={"solid"}
+              label={"Medium Dataset"}
+              onClick={this.populateMediumDataset}
+              className={"medium"}
+            />
+            <Button
+              bezelStyle={"solid"}
+              label={"Large Dataset"}
+              onClick={this.populateLargeDataset}
+              className={"large"}
+            />
+          </div>
+          <Components.TextField
+            onChange={this.handleChange}
+            label={"Database name"}
+            placeholder={"meteor"}
+            value={this.state.dbName}
+            name={"dbName"}
           />
-          <Button
-            bezelStyle={"solid"}
-            label={"Medium Dataset"}
-            onClick={this.populateMediumDataset}
-            className={"medium"}
+          <Components.TextField
+            onChange={this.handleChange}
+            label={"Mongo host"}
+            placeholder={"mongodb://localhost:3001"}
+            value={this.state.mongoHost}
+            name={"mongoHost"}
           />
-          <Button
-            bezelStyle={"solid"}
-            label={"Large Dataset"}
-            onClick={this.populateLargeDataset}
-            className={"large"}
+          <Components.TextField
+            onChange={this.handleChange}
+            label={"Top level products"}
+            placeholder={1000}
+            type={"number"}
+            value={this.state.products}
+            name={"products"}
           />
-        </div>
-        <Components.TextField
-          onChange={this.handleChange}
-          label={"Database name"}
-          placeholder={"meteor"}
-          value={this.state.dbName}
-          name={"dbName"}
-        />
-        <Components.TextField
-          onChange={this.handleChange}
-          label={"Mongo host"}
-          placeholder={"mongodb://localhost:3001"}
-          value={this.state.mongoHost}
-          name={"mongoHost"}
-        />
-        <Components.TextField
-          onChange={this.handleChange}
-          label={"Top level products"}
-          placeholder={1000}
-          type={"number"}
-          value={this.state.products}
-          name={"products"}
-        />
-        <Components.TextField
-          onChange={this.handleChange}
-          label={"Orders"}
-          placeholder={1000}
-          type={"number"}
-          value={this.state.orders}
-          name={"orders"}
-        />
-        <Components.TextField
-          onChange={this.handleChange}
-          label={"Categories"}
-          placeholder={10}
-          type={"number"}
-          value={this.state.tags}
-          name={"tags"}
-        />
-        <Components.TextField
-          onChange={this.handleChange}
-          label={"Images per SKU"}
-          placeholder={3}
-          type={"number"}
-          value={this.state.IPS}
-          name={"IPS"}
-        />
-        <div id="actionButtons">
-          <Button
-            bezelStyle={"solid"}
-            primary={true}
-            label={"Load Data"}
-            onClick={this.handleLoadData}
-            className={"loadData"}
+          <Components.TextField
+            onChange={this.handleChange}
+            label={"Orders"}
+            placeholder={1000}
+            type={"number"}
+            value={this.state.orders}
+            name={"orders"}
           />
-          <Button
-            bezelStyle={"solid"}
-            primary={true}
-            label={"Reset Data"}
-            onClick={this.handleResetData}
-            className={"resetData"}
+          <Components.TextField
+            onChange={this.handleChange}
+            label={"Categories"}
+            placeholder={10}
+            type={"number"}
+            value={this.state.tags}
+            name={"tags"}
           />
-          <Button
-            bezelStyle={"solid"}
-            label={"Load Sample Dataset"}
-            primary={true}
-            onClick={this.populateSampleDataset}
-            className={"loadSampleData"}
+          <Components.TextField
+            onChange={this.handleChange}
+            label={"Images per SKU"}
+            placeholder={3}
+            type={"number"}
+            value={this.state.IPS}
+            name={"IPS"}
           />
-        </div>
+          <div id="actionButtons">
+            <Button
+              bezelStyle={"solid"}
+              primary={true}
+              label={"Load Data"}
+              onClick={this.handleLoadData}
+              className={"loadData"}
+            />
+            <Button
+              bezelStyle={"solid"}
+              primary={true}
+              label={"Reset Data"}
+              onClick={this.handleResetData}
+              className={"resetData"}
+            />
+            <Button
+              bezelStyle={"solid"}
+              label={"Load Sample Dataset"}
+              primary={true}
+              onClick={this.populateSampleDataset}
+              className={"loadSampleData"}
+            />
+          </div>
         </SettingsCard>
       </div>
     );
