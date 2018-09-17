@@ -355,13 +355,8 @@ export const orderTemplate = {
         carrier: "Flat Rate"
       },
       paymentId: "CPgv7L9bH9wXFEGTT",
-      items: [
-        {
-          _id: "5DipCF2Nvdb4tLzsi",
-          productId: "BCTMZ6HTxFSppJESk",
-          shopId: "J8Bhq3uTtdgwZx3rz",
-          variantId: "CJoRBm9vRrorc9mxZ"
-        }
+      itemIds: [
+        "5DipCF2Nvdb4tLzsi"
       ],
       workflow: {
         status: "new",
