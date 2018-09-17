@@ -1,4 +1,4 @@
-import { Reaction } from "/server/api";
+import { Reaction } from "/lib/api";
 
 if (process.env.NODE_ENV === "development") {
   // Register package as ReactionCommerce package

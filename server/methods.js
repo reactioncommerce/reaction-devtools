@@ -12,7 +12,7 @@ import { Random } from "meteor/random";
 import { Job } from "/imports/plugins/core/job-collection/lib";
 import { Products, ProductSearch, Tags, Packages, Jobs, Orders, OrderSearch, Catalog, MediaRecords } from "/lib/collections";
 import { Media } from "/imports/plugins/core/files/server";
-import { Logger } from "/server/api";
+import Logger from "@reactioncommerce/logger";
 import { productTemplate, variantTemplate, optionTemplate, orderTemplate } from "./dataset";
 import collections from "/imports/collections/rawCollections";
 import publishProductToCatalogById from "/imports/plugins/core/catalog/server/no-meteor/utils/publishProductToCatalogById";

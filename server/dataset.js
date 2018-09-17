@@ -80,6 +80,8 @@ export const optionTemplate = {
 export const orderTemplate = {
   sessionId: "SjtGZesckPtxRf755",
   userId: "qoSQCkbnHayhf49xc",
+  accountId: "qoSQCkbnHayhf49xc",
+  currencyCode: "USD",
   shopId: "J8Bhq3uTtdgwZx3rz",
   workflow: {
     status: "new",
@@ -302,7 +304,24 @@ export const orderTemplate = {
         workflow: [
           "coreOrderWorkflow/created"
         ]
-      }
+      },
+      addedAt: new Date(),
+      createdAt: new Date(),
+      isTaxable: true,
+      optionTitle: "Green",
+      priceWhenAdded: {
+        amount: 12.99,
+        currencyCode: "USD"
+      },
+      productId: "BCTMZ6HTxFSppJESk",
+      productSlug: "example-product",
+      productType: "simple",
+      productVendor: "Example Manufacturer",
+      shopId: "J8Bhq3uTtdgwZx3rz",
+      taxCode: "0000",
+      updatedAt: new Date(),
+      variantId: "CJoRBm9vRrorc9mxZ",
+      variantTitle: "Option 2 - Green Tomato",
     }
   ],
   shipping: [
@@ -355,9 +374,7 @@ export const orderTemplate = {
         carrier: "Flat Rate"
       },
       paymentId: "CPgv7L9bH9wXFEGTT",
-      itemIds: [
-        "5DipCF2Nvdb4tLzsi"
-      ],
+      itemIds: [ "5DipCF2Nvdb4tLzsi" ],
       workflow: {
         status: "new",
         workflow: [
