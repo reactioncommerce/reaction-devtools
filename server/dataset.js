@@ -272,7 +272,6 @@ export const orderTemplate = {
           group: "Ground",
           handling: 0,
           rate: 2.99,
-          enabled: true,
           _id: "ppsATnw3f4r4ARHvu",
           carrier: "Flat Rate",
           currencyCode: "USD"
@@ -319,27 +318,6 @@ export const orderTemplate = {
   shipping: [
     {
       shopId: "J8Bhq3uTtdgwZx3rz",
-      shipmentQuotes: [
-        {
-          carrier: "Flat Rate",
-          method: {
-            name: "Standard",
-            label: "Standard",
-            group: "Ground",
-            handling: 0,
-            rate: 2.99,
-            enabled: true,
-            _id: "ppsATnw3f4r4ARHvu",
-            carrier: "Flat Rate"
-          },
-          rate: 2.99,
-          shopId: "J8Bhq3uTtdgwZx3rz"
-        }
-      ],
-      shipmentQuotesQueryStatus: {
-        requestStatus: "success",
-        numOfShippingMethodsFound: 1
-      },
       _id: "uqxDNgszdbk7TCQoY",
       address: {
         country: "US",
@@ -361,11 +339,28 @@ export const orderTemplate = {
         group: "Ground",
         handling: 0,
         rate: 2.99,
-        enabled: true,
         _id: "ppsATnw3f4r4ARHvu",
-        carrier: "Flat Rate"
+        carrier: "Flat Rate",
+        currencyCode: "USD"
       },
-      paymentId: "CPgv7L9bH9wXFEGTT",
+      payment: {
+        _id: "CPgv7L9bH9wXFEGTT",
+        displayName: "Visa 4242",
+        amount: 15.98,
+        invoice: {
+          shipping: 2.99,
+          subtotal: 12.99,
+          taxes: 0,
+          discounts: 0,
+          total: 15.98
+        },
+        method: "credit",
+        mode: "authorize",
+        paymentPluginName: "example-paymentmethod",
+        processor: "Example",
+        status: "created",
+        shopId: "J8Bhq3uTtdgwZx3rz"
+      },
       itemIds: [ "5DipCF2Nvdb4tLzsi" ],
       workflow: {
         status: "new",
