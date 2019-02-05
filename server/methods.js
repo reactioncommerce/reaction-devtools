@@ -390,7 +390,7 @@ function addProduct() {
  * @returns {object} order - The order object
  */
 function addOrder() {
-  const order = _.cloneDeep(orderTemplate);
+  const order = { ...orderTemplate };
   order._id = Random.id().toString();
   order.createdAt = new Date();
   order.email = faker.internet.email();
