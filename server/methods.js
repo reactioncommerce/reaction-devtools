@@ -392,6 +392,7 @@ function addProduct() {
 function addOrder() {
   const order = { ...orderTemplate };
   order._id = Random.id().toString();
+  order.referenceId = Random.id().toString();
   order.createdAt = new Date();
   order.email = faker.internet.email();
   const newName = `${faker.name.firstName()} ${faker.name.lastName()}`;
