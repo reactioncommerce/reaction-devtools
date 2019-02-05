@@ -16,8 +16,18 @@ import Logger from "@reactioncommerce/logger";
 import { productTemplate, variantTemplate, optionTemplate, orderTemplate } from "./dataset";
 import collections from "/imports/collections/rawCollections";
 import publishProductToCatalogById from "/imports/plugins/core/catalog/server/no-meteor/utils/publishProductToCatalogById";
+import getGraphQLContextInMeteorMethod from "/imports/plugins/core/graphql/server/getGraphQLContextInMeteorMethod";
 
 const methods = {};
+
+function getContext() {
+  const context = {
+    ...Promise.await(getGraphQLContextInMeteorMethod(Meteor.userId())),
+    collections
+  };
+
+  return context;
+}
 
 /**
  * @method resetMedia
@@ -43,7 +53,7 @@ function loadSmallProducts() {
     product.updatedAt = new Date();
     Products.insert(product, {}, { publish: true });
     if (product.type === "simple" && product.isVisible) {
-      publishProductToCatalogById(product._id, collections);
+      publishProductToCatalogById(product._id, getContext());
     }
   });
   turnOnRevisions();
@@ -314,7 +324,7 @@ function attachProductImages(from = "random") {
       imagesAdded.push(product._id);
     }
     if (product.type === "simple" && product.isVisible) {
-      publishProductToCatalogById(product._id, collections);
+      publishProductToCatalogById(product._id, getContext());
     }
   }
   Logger.info("loaded product images");
