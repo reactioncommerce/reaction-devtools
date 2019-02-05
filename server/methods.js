@@ -395,20 +395,13 @@ function addOrder() {
   order.referenceId = Random.id().toString();
   order.createdAt = new Date();
   order.email = faker.internet.email();
+
   const newName = `${faker.name.firstName()} ${faker.name.lastName()}`;
-  order.billing.forEach((billingRecord, index) => {
-    order.billing[index].paymentMethod.createdAt = new Date();
-    order.billing[index].address.fullName = newName;
-  });
 
   order.shipping.forEach((shippingRecord, index) => {
     order.shipping[index].address.fullName = newName;
   });
 
-  order.items.forEach((item, index) => {
-    order.items[index].product.createdAt = new Date();
-    order.items[index].variants.createdAt = new Date();
-  });
   return order;
 }
 
