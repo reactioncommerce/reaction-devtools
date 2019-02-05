@@ -73,8 +73,6 @@ export const optionTemplate = {
 };
 
 export const orderTemplate = {
-  sessionId: "SjtGZesckPtxRf755",
-  userId: "qoSQCkbnHayhf49xc",
   accountId: "qoSQCkbnHayhf49xc",
   currencyCode: "USD",
   shopId: "J8Bhq3uTtdgwZx3rz",
@@ -276,7 +274,8 @@ export const orderTemplate = {
           rate: 2.99,
           enabled: true,
           _id: "ppsATnw3f4r4ARHvu",
-          carrier: "Flat Rate"
+          carrier: "Flat Rate",
+          currencyCode: "USD"
         },
         paymentId: "CPgv7L9bH9wXFEGTT",
         items: [
