@@ -308,11 +308,9 @@ export const orderTemplate = {
         amount: 12.99,
         currencyCode: "USD"
       },
-      productId: "BCTMZ6HTxFSppJESk",
       productSlug: "example-product",
       productType: "simple",
       productVendor: "Example Manufacturer",
-      shopId: "J8Bhq3uTtdgwZx3rz",
       taxCode: "0000",
       updatedAt: new Date(),
       variantId: "CJoRBm9vRrorc9mxZ",
