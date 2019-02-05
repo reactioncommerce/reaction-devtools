@@ -309,7 +309,7 @@ function attachProductImages(from = "random") {
   const products = Products.find({}).fetch();
   const productIds = products.map(({ _id }) => _id);
   const media = MediaRecords.find({ "metadata.productId": { $in: productIds } }).fetch();
-  const productIdsWithMedia = _.uniq(media.map((doc) => doc.metadata.productId));
+  const productIdsWithMedia = [...new Set(media.map((doc) => doc.metadata.productId))];
   let imagesAdded = [];
   for (const product of products) {
     // include top level products and options but not top-level variants
