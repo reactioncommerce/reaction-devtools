@@ -18,11 +18,6 @@ export const productTemplate = {
   isLowQuantity: false,
   isSoldOut: false,
   isBackorder: false,
-  positions: {
-    "reaction swag shop": {
-      weight: 1
-    }
-  },
   hashtags: []
 };
 

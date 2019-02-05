@@ -238,7 +238,7 @@ function loadSwagShopProductImage(product) {
 
     Promise.await(Media.insert(fileRecord));
     Promise.await(storeFromAttachedBuffer(fileRecord));
-  } catch {
+  } catch (e) {
     return; // When image is not found, do nothing
   }
 }
@@ -313,9 +313,9 @@ function attachProductImages(from = "random") {
       }
       imagesAdded.push(product._id);
     }
-    if (product.type === "simple" && product.isVisible) { 
-      publishProductToCatalogById(product._id, collections); 
-    } 
+    if (product.type === "simple" && product.isVisible) {
+      publishProductToCatalogById(product._id, collections);
+    }
   }
   Logger.info("loaded product images");
 }

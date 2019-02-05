@@ -23,11 +23,6 @@
 	"vendor": "Bluestone Coffee",
 	"description": "A bag of rich Arabica coffee. Great for a fueling up for a night out or for settling in for a night of coding at home",
 	"isBackorder": true,
-	"positions": {
-		"reaction swag shop": {
-			"weight": 1
-		}
-	},
 	"hashtags": [
 		"hZdSevCBP8dDc66Ba"
 	]
@@ -143,11 +138,6 @@
 	"vendor": "Mugworks",
 	"description": "A sturdy mug to keep your hot drinks hot and your cold drinks cold",
 	"isBackorder": true,
-	"positions": {
-		"reaction swag shop": {
-			"weight": 1
-		}
-	},
 	"hashtags": [
 		"hZdSevCBP8dDc66Ba"
 	]
