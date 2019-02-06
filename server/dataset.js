@@ -18,7 +18,8 @@ export const productTemplate = {
   isLowQuantity: false,
   isSoldOut: false,
   isBackorder: false,
-  hashtags: []
+  hashtags: [],
+  supportedFulfillmentTypes: ["shipping"]
 };
 
 export const variantTemplate = {

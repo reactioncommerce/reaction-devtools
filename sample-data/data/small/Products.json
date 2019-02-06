@@ -1,6 +1,7 @@
 [{
 	"_id": "h2v7MYCXBtjMm7Piv",
 	"type": "simple",
+  "supportedFulfillmentTypes": ["shipping"],
 	"ancestors": [],
 	"shopId": "J8Bhq3uTtdgwZx3rz",
 	"title": "Reaction Bag of Beans",
@@ -116,6 +117,7 @@
 {
 	"_id": "z6paQqnrGnWBvepyB",
 	"type": "simple",
+  "supportedFulfillmentTypes": ["shipping"],
 	"ancestors": [],
 	"shopId": "J8Bhq3uTtdgwZx3rz",
 	"title": "Reaction Mug",
@@ -173,6 +175,7 @@
 {
 	"_id": "gygxrADdPPWoCCmS7",
 	"type": "simple",
+  "supportedFulfillmentTypes": ["shipping"],
 	"ancestors": [],
 	"shopId": "J8Bhq3uTtdgwZx3rz",
 	"title": "Reaction Commerce Pouch",
@@ -230,6 +233,7 @@
 {
 	"_id": "ioKwBYk6Nom9K92cv",
 	"type": "simple",
+  "supportedFulfillmentTypes": ["shipping"],
 	"ancestors": [],
 	"shopId": "J8Bhq3uTtdgwZx3rz",
 	"title": "Reaction Scout Book",
@@ -287,6 +291,7 @@
 {
 	"_id": "xsudQc3K2EbqCeFBm",
 	"type": "simple",
+  "supportedFulfillmentTypes": ["shipping"],
 	"ancestors": [],
 	"shopId": "J8Bhq3uTtdgwZx3rz",
 	"title": "Reaction Ladies Shirt",
@@ -460,6 +465,7 @@
 {
 	"_id": "GpZM5v5qQBCdXsoqW",
 	"type": "simple",
+  "supportedFulfillmentTypes": ["shipping"],
 	"ancestors": [],
 	"shopId": "J8Bhq3uTtdgwZx3rz",
 	"title": "Reaction Mens Shirt",
@@ -633,6 +639,7 @@
 {
 	"_id": "9zxhE27pAvx8vbKr5",
 	"type": "simple",
+  "supportedFulfillmentTypes": ["shipping"],
 	"ancestors": [],
 	"shopId": "J8Bhq3uTtdgwZx3rz",
 	"title": "Reaction Sticker",
@@ -690,6 +697,7 @@
 {
 	"_id": "5pe6Y2sxKy5eppGMF",
 	"type": "simple",
+  "supportedFulfillmentTypes": ["shipping"],
 	"isVisible": true,
 	"ancestors": [],
 	"title": "Reaction Hoodie",
@@ -861,6 +869,7 @@
 {
 	"_id": "Ks3fNppgpv4G8R4gt",
 	"type": "simple",
+  "supportedFulfillmentTypes": ["shipping"],
 	"isVisible": true,
 	"ancestors": [],
 	"title": "Reaction Camp Shirt",
