@@ -13,6 +13,7 @@
   "dependencies": {
     "buffer-stream-reader": "^0.1.1",
     "jpeg-js": "^0.3.3",
+    "node-fetch": "^2.3.0",
     "random-puppy": "^1.1.0"
   },
   "scripts": {

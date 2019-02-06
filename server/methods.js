@@ -272,6 +272,7 @@ async function createProductImageFromUrl(product) {
   } while (!isImage);
 
   const fileRecord = await FileRecord.fromUrl(url, { fetch });
+
   const { shopId } = product;
   const topVariant = getTopVariant(product._id);
   if (product.type === "simple") {
