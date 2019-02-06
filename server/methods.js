@@ -369,8 +369,8 @@ function addProduct() {
     const optionId = Random.id().toString();
     option._id = optionId;
     option.optionTitle = faker.commerce.productName();
-    option.price = faker.commerce.price();
-    optionPrices.push(parseFloat(option.price));
+    option.price = parseFloat(faker.commerce.price());
+    optionPrices.push(option.price);
     option.ancestors = [productId, variantId];
     products.push(option);
   }
@@ -389,8 +389,8 @@ function addProduct() {
 
   const priceObject = {
     range: priceRange,
-    min: priceMin,
-    max: priceMax
+    min: parseFloat(priceMin),
+    max: parseFloat(priceMax)
   };
 
   product.price = priceObject;

@@ -13,8 +13,8 @@
 	"template": "productDetailSimple",
 	"price": {
 		"range": "12 - 24",
-		"min": 12,
-		"max": 24
+		"min": 12.00,
+		"max": 24.00
 	},
 	"workflow": {
 		"status": "new"
@@ -33,7 +33,7 @@
 	"ancestors": [
 		"h2v7MYCXBtjMm7Piv"
 	],
-	"price": 0,
+	"price": 0.00,
 	"type": "variant",
 	"isVisible": true,
 	"isDeleted": false,
@@ -64,7 +64,7 @@
 	],
 	"type": "variant",
 	"title": "One pound bag",
-	"price": 12,
+	"price": 12.00,
 	"isVisible": true,
 	"isDeleted": false,
 	"compareAtPrice": 15,
@@ -93,7 +93,7 @@
 	],
 	"type": "variant",
 	"title": "Two pound bag",
-	"price": 24,
+	"price": 24.00,
 	"isVisible": true,
 	"isDeleted": false,
 	"compareAtPrice": 28,
@@ -129,8 +129,8 @@
 	"template": "productDetailSimple",
 	"price": {
 		"range": "15",
-		"min": 15,
-		"max": 15
+		"min": 15.00,
+		"max": 15.00
 	},
 	"workflow": {
 		"status": "new"
@@ -149,7 +149,7 @@
 	"ancestors": [
 		"z6paQqnrGnWBvepyB"
 	],
-	"price": 15,
+	"price": 15.00,
 	"type": "variant",
 	"isVisible": true,
 	"isDeleted": false,
@@ -187,8 +187,8 @@
 	"template": "productDetailSimple",
 	"price": {
 		"range": "8",
-		"min": 8,
-		"max": 8
+		"min": 8.00,
+		"max": 8.00
 	},
 	"workflow": {
 		"status": "new"
@@ -207,7 +207,7 @@
 	"ancestors": [
 		"gygxrADdPPWoCCmS7"
 	],
-	"price": 8,
+	"price": 8.00,
 	"type": "variant",
 	"isVisible": true,
 	"isDeleted": false,
@@ -245,8 +245,8 @@
 	"template": "productDetailSimple",
 	"price": {
 		"range": "6",
-		"min": 6,
-		"max": 6
+		"min": 6.00,
+		"max": 6.00
 	},
 	"workflow": {
 		"status": "new"
@@ -265,7 +265,7 @@
 	"ancestors": [
 		"ioKwBYk6Nom9K92cv"
 	],
-	"price": 6,
+	"price": 6.00,
 	"type": "variant",
 	"isVisible": true,
 	"isDeleted": false,
@@ -303,8 +303,8 @@
 	"template": "productDetailSimple",
 	"price": {
 		"range": "18 - 20",
-		"min": 18,
-		"max": 20
+		"min": 18.00,
+		"max": 20.00
 	},
 	"workflow": {
 		"status": "new"
@@ -323,7 +323,7 @@
 	"ancestors": [
 		"xsudQc3K2EbqCeFBm"
 	],
-	"price": 18,
+	"price": 18.00,
 	"type": "variant",
 	"isVisible": true,
 	"isDeleted": false,
@@ -354,7 +354,7 @@
 	],
 	"type": "variant",
 	"title": "SM",
-	"price": 18,
+	"price": 18.00,
 	"isVisible": true,
 	"isDeleted": false,
 	"compareAtPrice": 24,
@@ -383,7 +383,7 @@
 	],
 	"type": "variant",
 	"title": "M",
-	"price": 18,
+	"price": 18.00,
 	"isVisible": true,
 	"isDeleted": false,
 	"compareAtPrice": 24,
@@ -412,7 +412,7 @@
 	],
 	"type": "variant",
 	"title": "L",
-	"price": 18,
+	"price": 18.00,
 	"isVisible": true,
 	"isDeleted": false,
 	"compareAtPrice": 24,
@@ -441,7 +441,7 @@
 	],
 	"type": "variant",
 	"title": "XL",
-	"price": 20,
+	"price": 20.00,
 	"isVisible": true,
 	"isDeleted": false,
 	"compareAtPrice": 26,
@@ -476,8 +476,8 @@
 	"template": "productDetailSimple",
 	"price": {
 		"range": "18 - 20",
-		"min": 18,
-		"max": 20
+		"min": 18.00,
+		"max": 20.00
 	},
 	"workflow": {
 		"status": "new"
@@ -497,7 +497,7 @@
 	"ancestors": [
 		"GpZM5v5qQBCdXsoqW"
 	],
-	"price": 18,
+	"price": 18.00,
 	"type": "variant",
 	"isVisible": true,
 	"isDeleted": false,
@@ -528,7 +528,7 @@
 		"cxYA8s8qdi8qnYSNw"
 	],
 	"lowInventoryWarningThreshold": 0,
-	"price": 18,
+	"price": 18.00,
 	"height": 1,
 	"compareAtPrice": 24,
 	"originCountry": "US",
@@ -557,7 +557,7 @@
 		"cxYA8s8qdi8qnYSNw"
 	],
 	"lowInventoryWarningThreshold": 0,
-	"price": 18,
+	"price": 18.00,
 	"height": 2,
 	"compareAtPrice": 24,
 	"originCountry": "US",
@@ -586,7 +586,7 @@
 		"cxYA8s8qdi8qnYSNw"
 	],
 	"lowInventoryWarningThreshold": 0,
-	"price": 18,
+	"price": 18.00,
 	"height": 1,
 	"compareAtPrice": 24,
 	"originCountry": "US",
@@ -615,7 +615,7 @@
 		"cxYA8s8qdi8qnYSNw"
 	],
 	"lowInventoryWarningThreshold": 0,
-	"price": 20,
+	"price": 20.00,
 	"height": 1,
 	"compareAtPrice": 26,
 	"originCountry": "US",
@@ -651,8 +651,8 @@
 	"template": "productDetailSimple",
 	"price": {
 		"range": "4",
-		"min": 4,
-		"max": 4
+		"min": 4.00,
+		"max": 4.00
 	},
 	"workflow": {
 		"status": "new"
@@ -671,7 +671,7 @@
 	"ancestors": [
 		"9zxhE27pAvx8vbKr5"
 	],
-	"price": 4,
+	"price": 4.00,
 	"type": "variant",
 	"isVisible": true,
 	"isDeleted": false,
@@ -712,8 +712,8 @@
 	},
 	"price": {
 		"range": "35",
-		"min": 35,
-		"max": 35
+		"min": 35.00,
+		"max": 35.00
 	},
 	"vendor": "Hanes",
 	"description": "Whether DJ'ing your EDM set or hacking into the NSA this stylish hoodie will keep your tiny fragile body warm",
@@ -728,7 +728,7 @@
 	"ancestors": [
 		"5pe6Y2sxKy5eppGMF"
 	],
-	"price": 0,
+	"price": 0.00,
 	"inventoryQuantity": 0,
 	"isDeleted": false,
 	"compareAtPrice": 0,
@@ -758,7 +758,7 @@
 	],
 	"type": "variant",
 	"title": "S",
-	"price": 35,
+	"price": 35.00,
 	"inventoryQuantity": 100,
 	"isDeleted": false,
 	"compareAtPrice": 55,
@@ -787,7 +787,7 @@
 	],
 	"type": "variant",
 	"title": "M",
-	"price": 35,
+	"price": 35.00,
 	"inventoryQuantity": 100,
 	"isDeleted": false,
 	"compareAtPrice": 55,
@@ -816,7 +816,7 @@
 	],
 	"type": "variant",
 	"title": "L",
-	"price": 35,
+	"price": 35.00,
 	"inventoryQuantity": 100,
 	"isDeleted": false,
 	"compareAtPrice": 55,
@@ -845,7 +845,7 @@
 	],
 	"type": "variant",
 	"title": "XL",
-	"price": 35,
+	"price": 35.00,
 	"inventoryQuantity": 100,
 	"isDeleted": false,
 	"compareAtPrice": 55,
@@ -883,8 +883,8 @@
 	},
 	"price": {
 		"range": "40 - 45",
-		"min": 40,
-		"max": 45
+		"min": 40.00,
+		"max": 45.00
 	},
 	"vendor": "Hanes",
 	"description": "This camp shirt is a classy, clean alternative to T-shirts or Polos. Represent Reaction at camp or on the road",
@@ -900,7 +900,7 @@
 	"ancestors": [
 		"Ks3fNppgpv4G8R4gt"
 	],
-	"price": 0,
+	"price": 0.00,
 	"inventoryQuantity": 0,
 	"isDeleted": false,
 	"compareAtPrice": 0,
@@ -930,7 +930,7 @@
 	],
 	"type": "variant",
 	"title": "S",
-	"price": 40,
+	"price": 40.00,
 	"inventoryQuantity": 100,
 	"isDeleted": false,
 	"compareAtPrice": 55,
@@ -959,7 +959,7 @@
 	],
 	"type": "variant",
 	"title": "M",
-	"price": 40,
+	"price": 40.00,
 	"inventoryQuantity": 100,
 	"isDeleted": false,
 	"compareAtPrice": 55,
@@ -988,7 +988,7 @@
 	],
 	"type": "variant",
 	"title": "L",
-	"price": 45,
+	"price": 45.00,
 	"inventoryQuantity": 100,
 	"isDeleted": false,
 	"compareAtPrice": 55,
@@ -1017,7 +1017,7 @@
 	],
 	"type": "variant",
 	"title": "XL",
-	"price": 45,
+	"price": 45.00,
 	"inventoryQuantity": 100,
 	"isDeleted": false,
 	"compareAtPrice": 55,

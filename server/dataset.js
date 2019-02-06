@@ -8,8 +8,8 @@ export const productTemplate = {
   isVisible: true,
   price: {
     range: "12 - 24",
-    min: 12,
-    max: 24
+    min: 12.00,
+    max: 24.00
   },
   template: "productDetailSimple",
   workflow: {
@@ -24,7 +24,7 @@ export const productTemplate = {
 
 export const variantTemplate = {
   ancestors: [],
-  price: 0,
+  price: 0.00,
   type: "variant",
   isVisible: true,
   isDeleted: false,
@@ -52,7 +52,7 @@ export const optionTemplate = {
   ancestors: [],
   type: "variant",
   title: "One pound bag",
-  price: 12,
+  price: 12.00,
   isVisible: true,
   isDeleted: false,
   compareAtPrice: 15,
