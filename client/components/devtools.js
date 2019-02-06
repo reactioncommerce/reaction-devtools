@@ -168,7 +168,7 @@ class DevTools extends Component {
           <Button
             bezelStyle={"solid"}
             primary={true}
-            label={"Load Produts and Tags"}
+            label={"Load Products and Tags"}
             onClick={this.handleMediumDataClick}
           />
           <br />
@@ -198,7 +198,7 @@ class DevTools extends Component {
           <Button
             bezelStyle={"solid"}
             primary={true}
-            label={"Load Produts and Tags"}
+            label={"Load Products and Tags"}
             onClick={this.handleLargeDataClick}
           />
           <br />
