@@ -3,7 +3,6 @@ import randomPuppy from "random-puppy";
 import fetch from "node-fetch";
 import jpeg from "jpeg-js";
 import faker from "faker";
-import _ from "lodash";
 import { slugify } from "transliteration";
 import bufferStreamReader from "buffer-stream-reader";
 import { FileRecord } from "@reactioncommerce/file-collections";
@@ -338,10 +337,13 @@ function attachProductImages(from = "random") {
  */
 function addProduct() {
   const products = [];
-  const product = _.cloneDeep(productTemplate);
+
+  const product = { ...productTemplate };
   const productId = Random.id().toString();
-  const variant = _.cloneDeep(variantTemplate);
+
+  const variant = { ...variantTemplate };
   const variantId = Random.id().toString();
+
   product._id = productId;
   product.description = faker.lorem.paragraph();
   product.title = faker.commerce.productName();
@@ -349,17 +351,21 @@ function addProduct() {
   product.handle = slugify(product.title);
   product.createdAt = new Date();
   product.updatedAt = new Date();
+
   // always one top level variant
   variant._id = variantId;
   variant.ancestors = [productId];
   variant.title = faker.commerce.productName();
   variant.createdAt = new Date();
   variant.updatedAt = new Date();
+
   products.push(variant);
+
   const numOptions = Random.choice([1, 2, 3, 4]);
   const optionPrices = [];
+
   for (let x = 0; x < numOptions; x += 1) {
-    const option = _.cloneDeep(optionTemplate);
+    const option = { ...optionTemplate };
     const optionId = Random.id().toString();
     option._id = optionId;
     option.optionTitle = faker.commerce.productName();
@@ -368,20 +374,29 @@ function addProduct() {
     option.ancestors = [productId, variantId];
     products.push(option);
   }
-  const priceMin = _.min(optionPrices);
-  const priceMax = _.max(optionPrices);
+
+  // Math.(min|max).apply allows to pass arguments as array, as Math.(min|max) usually take an indefinite number of args
+  // ex.: Math.min(1, 2, 3, 4)
+  // See https://www.jstips.co/en/javascript/calculate-the-max-min-value-from-an-array/
+  const priceMin = Math.min.apply(null, optionPrices);
+  const priceMax = Math.max.apply(null, optionPrices);
+
   let priceRange = `${priceMin} - ${priceMax}`;
   // if we don't have a range
   if (priceMin === priceMax) {
     priceRange = priceMin.toString();
   }
+
   const priceObject = {
     range: priceRange,
     min: priceMin,
     max: priceMax
   };
+
   product.price = priceObject;
+
   products.push(product);
+
   return products;
 }
 
