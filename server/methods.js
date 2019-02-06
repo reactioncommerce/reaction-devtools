@@ -3,7 +3,6 @@ import randomPuppy from "random-puppy";
 import fetch from "node-fetch";
 import jpeg from "jpeg-js";
 import faker from "faker";
-import _ from "lodash";
 import { slugify } from "transliteration";
 import bufferStreamReader from "buffer-stream-reader";
 import { FileRecord } from "@reactioncommerce/file-collections";
@@ -12,12 +11,22 @@ import { Random } from "meteor/random";
 import { Job } from "/imports/plugins/core/job-collection/lib";
 import { Products, ProductSearch, Tags, Packages, Jobs, Orders, OrderSearch, Catalog, MediaRecords } from "/lib/collections";
 import { Media } from "/imports/plugins/core/files/server";
-import { Logger } from "/server/api";
+import Logger from "@reactioncommerce/logger";
 import { productTemplate, variantTemplate, optionTemplate, orderTemplate } from "./dataset";
 import collections from "/imports/collections/rawCollections";
 import publishProductToCatalogById from "/imports/plugins/core/catalog/server/no-meteor/utils/publishProductToCatalogById";
+import getGraphQLContextInMeteorMethod from "/imports/plugins/core/graphql/server/getGraphQLContextInMeteorMethod";
 
 const methods = {};
+
+function getContext() {
+  const context = {
+    ...Promise.await(getGraphQLContextInMeteorMethod(Meteor.userId())),
+    collections
+  };
+
+  return context;
+}
 
 /**
  * @method resetMedia
@@ -43,7 +52,7 @@ function loadSmallProducts() {
     product.updatedAt = new Date();
     Products.insert(product, {}, { publish: true });
     if (product.type === "simple" && product.isVisible) {
-      publishProductToCatalogById(product._id, collections);
+      publishProductToCatalogById(product._id, getContext());
     }
   });
   turnOnRevisions();
@@ -238,7 +247,7 @@ function loadSwagShopProductImage(product) {
 
     Promise.await(Media.insert(fileRecord));
     Promise.await(storeFromAttachedBuffer(fileRecord));
-  } catch {
+  } catch (e) {
     return; // When image is not found, do nothing
   }
 }
@@ -262,6 +271,7 @@ async function createProductImageFromUrl(product) {
   } while (!isImage);
 
   const fileRecord = await FileRecord.fromUrl(url, { fetch });
+
   const { shopId } = product;
   const topVariant = getTopVariant(product._id);
   if (product.type === "simple") {
@@ -299,7 +309,7 @@ function attachProductImages(from = "random") {
   const products = Products.find({}).fetch();
   const productIds = products.map(({ _id }) => _id);
   const media = MediaRecords.find({ "metadata.productId": { $in: productIds } }).fetch();
-  const productIdsWithMedia = _.uniq(media.map((doc) => doc.metadata.productId));
+  const productIdsWithMedia = [...new Set(media.map((doc) => doc.metadata.productId))];
   let imagesAdded = [];
   for (const product of products) {
     // include top level products and options but not top-level variants
@@ -313,9 +323,9 @@ function attachProductImages(from = "random") {
       }
       imagesAdded.push(product._id);
     }
-    if (product.type === "simple" && product.isVisible) { 
-      publishProductToCatalogById(product._id, collections); 
-    } 
+    if (product.type === "simple" && product.isVisible) {
+      publishProductToCatalogById(product._id, getContext());
+    }
   }
   Logger.info("loaded product images");
 }
@@ -327,10 +337,13 @@ function attachProductImages(from = "random") {
  */
 function addProduct() {
   const products = [];
-  const product = _.cloneDeep(productTemplate);
+
+  const product = { ...productTemplate };
   const productId = Random.id().toString();
-  const variant = _.cloneDeep(variantTemplate);
+
+  const variant = { ...variantTemplate };
   const variantId = Random.id().toString();
+
   product._id = productId;
   product.description = faker.lorem.paragraph();
   product.title = faker.commerce.productName();
@@ -338,39 +351,52 @@ function addProduct() {
   product.handle = slugify(product.title);
   product.createdAt = new Date();
   product.updatedAt = new Date();
+
   // always one top level variant
   variant._id = variantId;
   variant.ancestors = [productId];
   variant.title = faker.commerce.productName();
   variant.createdAt = new Date();
   variant.updatedAt = new Date();
+
   products.push(variant);
+
   const numOptions = Random.choice([1, 2, 3, 4]);
   const optionPrices = [];
+
   for (let x = 0; x < numOptions; x += 1) {
-    const option = _.cloneDeep(optionTemplate);
+    const option = { ...optionTemplate };
     const optionId = Random.id().toString();
     option._id = optionId;
     option.optionTitle = faker.commerce.productName();
-    option.price = faker.commerce.price();
-    optionPrices.push(parseFloat(option.price));
+    option.price = parseFloat(faker.commerce.price());
+    optionPrices.push(option.price);
     option.ancestors = [productId, variantId];
     products.push(option);
   }
-  const priceMin = _.min(optionPrices);
-  const priceMax = _.max(optionPrices);
+
+  // Math.(min|max).apply allows to pass arguments as array, as Math.(min|max) usually take an indefinite number of args
+  // ex.: Math.min(1, 2, 3, 4)
+  // See https://www.jstips.co/en/javascript/calculate-the-max-min-value-from-an-array/
+  const priceMin = Math.min.apply(null, optionPrices);
+  const priceMax = Math.max.apply(null, optionPrices);
+
   let priceRange = `${priceMin} - ${priceMax}`;
   // if we don't have a range
   if (priceMin === priceMax) {
     priceRange = priceMin.toString();
   }
+
   const priceObject = {
     range: priceRange,
-    min: priceMin,
-    max: priceMax
+    min: parseFloat(priceMin),
+    max: parseFloat(priceMax)
   };
+
   product.price = priceObject;
+
   products.push(product);
+
   return products;
 }
 
@@ -380,24 +406,18 @@ function addProduct() {
  * @returns {object} order - The order object
  */
 function addOrder() {
-  const order = _.cloneDeep(orderTemplate);
+  const order = { ...orderTemplate };
   order._id = Random.id().toString();
+  order.referenceId = Random.id().toString();
   order.createdAt = new Date();
   order.email = faker.internet.email();
+
   const newName = `${faker.name.firstName()} ${faker.name.lastName()}`;
-  order.billing.forEach((billingRecord, index) => {
-    order.billing[index].paymentMethod.createdAt = new Date();
-    order.billing[index].address.fullName = newName;
-  });
 
   order.shipping.forEach((shippingRecord, index) => {
     order.shipping[index].address.fullName = newName;
   });
 
-  order.items.forEach((item, index) => {
-    order.items[index].product.createdAt = new Date();
-    order.items[index].variants.createdAt = new Date();
-  });
   return order;
 }
 

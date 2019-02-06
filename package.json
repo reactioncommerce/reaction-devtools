@@ -13,6 +13,7 @@
   "dependencies": {
     "buffer-stream-reader": "^0.1.1",
     "jpeg-js": "^0.3.3",
+    "node-fetch": "^2.3.0",
     "random-puppy": "^1.1.0"
   },
   "scripts": {
@@ -24,15 +25,6 @@
   "babel": {
     "plugins": [
       [
-        "lodash",
-        {
-          "id": [
-            "lodash",
-            "recompose"
-          ]
-        }
-      ],
-      [
         "module-resolver",
         {
           "root": [
@@ -42,8 +34,7 @@
             "@reactioncommerce/reaction-collections": "./imports/plugins/core/collections",
             "@reactioncommerce/reaction-components": "./imports/plugins/core/components/lib",
             "@reactioncommerce/reaction-router": "./imports/plugins/core/router/lib",
-            "@reactioncommerce/reaction-ui": "./imports/plugins/core/ui/client/components",
-            "underscore": "lodash"
+            "@reactioncommerce/reaction-ui": "./imports/plugins/core/ui/client/components"
           }
         }
       ]
