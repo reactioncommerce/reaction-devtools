@@ -1,0 +1,14 @@
+[{
+  "language": "English",
+  "i18n": "en",
+  "ns": "core",
+  "translation": {
+    "core": {
+      "admin": {
+        "settings": {
+          "devToolsLabel": "DevTools"
+        }
+      }
+    }
+  }
+}]
