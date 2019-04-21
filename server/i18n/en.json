@@ -1,9 +1,9 @@
 [{
   "language": "English",
   "i18n": "en",
-  "ns": "core",
+  "ns": "reaction-devtools",
   "translation": {
-    "core": {
+    "reaction-devtools": {
       "admin": {
         "settings": {
           "devToolsLabel": "DevTools"
