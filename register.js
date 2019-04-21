@@ -1,6 +1,6 @@
 import { Reaction } from "/lib/api";
 
-if (process.env.NODE_ENV === "development") {
+// if (process.env.NODE_ENV === "development") {
   // Register package as ReactionCommerce package
   Reaction.registerPackage({
     label: "Reaction Devtools",
@@ -21,4 +21,4 @@ if (process.env.NODE_ENV === "development") {
       }
     ]
   });
-}
+// }

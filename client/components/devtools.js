@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import { Meteor } from "meteor/meteor";
-import { composeWithTracker, registerComponent } from "@reactioncommerce/reaction-components";
 import { Button, SettingsCard } from "@reactioncommerce/reaction-ui";
 
 
@@ -122,7 +121,7 @@ class DevTools extends Component {
         </SettingsCard>
 
         <SettingsCard
-          title={"Small shop data (10 products, 100 orders"}
+          title={"Small shop data (10 products, 100 orders)"}
           expanded={true}
           showSwitch={false}
         >
@@ -224,10 +223,4 @@ class DevTools extends Component {
   }
 }
 
-registerComponent("DevTools", DevTools);
-
-function composer(onData) {
-  onData(null, {});
-}
-
-export default composeWithTracker(composer)(DevTools);
+export default DevTools;
