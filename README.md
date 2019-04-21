@@ -15,3 +15,12 @@ You have a choice of three different datasets and optionally attach random image
 1. Clone this repo into `/imports/plugins/custom/`
 1. `meteor npm install jpeg-js` (for random image generation)
 1. `reaction reset`
+
+
+### Usage
+
+1. Browse to `http://localhost:3000`
+1. Login
+1. Click on DevTools (note this is only visible when running in development mode)
+1. ![DevTools](screenshots/devtools-screen.png)
+1. Click the buttons to trigger an action
