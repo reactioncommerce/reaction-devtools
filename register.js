@@ -2,8 +2,8 @@ import { Reaction } from "/lib/api";
 
 // Register package as ReactionCommerce package
 Reaction.registerPackage({
-  label: "Reaction Devtools",
-  name: "reaction-devtools",
+  label: "Reaktor Devtools",
+  name: "reaktor-devtools",
   icon: "fa fa-code",
   meta: {
     version: "0.0.1"
@@ -11,8 +11,8 @@ Reaction.registerPackage({
   autoEnable: !!(process.env.NODE_ENV === "development"),
   registry: [
     {
-      name: "reaction-devtools-admin",
-      label: "Dev Tools",
+      name: "reaktor-devtools-admin",
+      label: "Reaktor Dev Tools",
       provides: ["settings"],
       container: "dashboard",
       template: "DevTools",

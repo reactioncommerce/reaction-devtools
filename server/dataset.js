@@ -2,7 +2,7 @@ export const productTemplate = {
   type: "simple",
   ancestors: [],
   shopId: "J8Bhq3uTtdgwZx3rz",
-  originCountry: "US",
+  originCountry: "AE",
   requiresShipping: true,
   isDeleted: false,
   isVisible: true,
@@ -36,13 +36,13 @@ export const variantTemplate = {
   inventoryManagement: true,
   inventoryPolicy: false,
   lowInventoryWarningThreshold: 0,
-  inventoryQuantity: 0,
+  inventoryQuantity: 100,
   shopId: "J8Bhq3uTtdgwZx3rz",
   taxable: true,
   taxCode: "0000",
   title: "Bag",
   optionTitle: "Untitled Option",
-  originCountry: "US",
+  originCountry: "AE",
   workflow: {
     status: "new"
   }
@@ -55,7 +55,7 @@ export const optionTemplate = {
   price: 12.00,
   isVisible: true,
   isDeleted: false,
-  compareAtPrice: 15,
+  compareAtPrice: 0,
   weight: 2,
   length: 2,
   width: 2,
@@ -67,7 +67,7 @@ export const optionTemplate = {
   shopId: "J8Bhq3uTtdgwZx3rz",
   taxable: true,
   taxCode: "0000",
-  originCountry: "US",
+  originCountry: "AE",
   workflow: {
     status: "new"
   }
@@ -75,7 +75,7 @@ export const optionTemplate = {
 
 export const orderTemplate = {
   accountId: "qoSQCkbnHayhf49xc",
-  currencyCode: "USD",
+  currencyCode: "AED",
   shopId: "J8Bhq3uTtdgwZx3rz",
   workflow: {
     status: "new",
@@ -109,7 +109,7 @@ export const orderTemplate = {
         rate: 2.99,
         _id: "ppsATnw3f4r4ARHvu",
         carrier: "Flat Rate",
-        currencyCode: "USD"
+        currencyCode: "AED"
       },
       payment: {
         _id: "CPgv7L9bH9wXFEGTT",
@@ -140,7 +140,7 @@ export const orderTemplate = {
           updatedAt: new Date(),
           price: {
             amount: 12.99,
-            currencyCode: "USD"
+            currencyCode: "AED"
           },
           quantity: 1,
           subtotal: 12.99,

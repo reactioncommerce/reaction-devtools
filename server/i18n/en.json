@@ -1,12 +1,12 @@
 [{
   "language": "English",
   "i18n": "en",
-  "ns": "reaction-devtools",
+  "ns": "reaktor-devtools",
   "translation": {
-    "reaction-devtools": {
+    "reaktor-devtools": {
       "admin": {
         "settings": {
-          "devToolsLabel": "DevTools"
+          "reaktorDevToolsLabel": "Reaktor DevTools"
         }
       }
     }
