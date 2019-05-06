@@ -38,7 +38,7 @@ function resetMedia() {
 function importProducts() {
   Logger.info("Starting load Products");
   turnOffRevisions();
-  const products = require("/imports/plugins/custom/reaktor-devtools/sample-data/data/levelkids/Products.json");
+  const products = require("/imports/plugins/custom/reaktor-devtools/sample-data/data/levelkids/ProductsFixed.json");
   products.forEach((product) => {
     product.createdAt = new Date();
     product.updatedAt = new Date();
