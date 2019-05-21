@@ -5,8 +5,9 @@ Reaction.registerPackage({
   label: "Reaction Devtools",
   name: "reaction-devtools",
   icon: "fa fa-code",
+  version: "1.0.0",
   meta: {
-    version: "0.0.1"
+    version: "1.0.0"
   },
   autoEnable: !!(process.env.NODE_ENV === "development"),
   registry: [
