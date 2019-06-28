@@ -1,0 +1,14 @@
+[{
+  "language": "English",
+  "i18n": "en",
+  "ns": "reaction-devtools",
+  "translation": {
+    "reaction-devtools": {
+      "admin": {
+        "settings": {
+          "devToolsLabel": "DevTools"
+        }
+      }
+    }
+  }
+}]
