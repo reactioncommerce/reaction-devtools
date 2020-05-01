@@ -1,3 +1,7 @@
+# ⚠️ THIS PLUGIN IS DEPRECATED — Use with Reaction Commerce 2.0 to 2.9.1 only
+
+This is an old devtools plugin made for Reaction Commerce 2.x. If you're looking for a similar devtools plugin for Reaction Commerce 3.0 onwards, check out [`@outgrowio/reaction-dummy-data`](https://github.com/outgrow/reaction-dummy-data).
+
 # reaction-devtools
 
 This is a plugin that creates a new dashboard panel that allows you to load datasets for testing
